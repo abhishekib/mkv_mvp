@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:goodchannel/screens/forgot_screen.dart';
+import 'package:goodchannel/screens/otp_screen.dart';
 import 'package:goodchannel/screens/sign_up_screen.dart';
+import 'package:goodchannel/widgets/utils.dart';
 
 void main() {
   runApp(MyApp());
@@ -52,245 +54,188 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Remove SafeArea to use full screen
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF6A1B9A), // Deep Purple
-              Color(0xFF303F9F), // Indigo
-            ],
-            transform: GradientRotation(3.338), // 191.28 degrees in radians
+      body: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFF6A1B9A), // Deep Purple
+                Color(0xFF303F9F), // Indigo
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 30),
-            child: Container(
-              constraints: BoxConstraints(maxWidth: 600),
-              padding: EdgeInsets.all(32.0),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(24.0),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
-                  width: 1,
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 30),
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 600),
+                padding: EdgeInsets.all(32.0),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(24.0),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: Offset(0, 8),
+                    ),
+                  ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Logo/Icon
-                  SizedBox(
-                    width: 100,
-                    height: 50,
-                    child: Image.asset(
-                      'assets/text_icon.png',
-                      width: 200,
-                      height: 100,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Logo/Icon
+                    SizedBox(
+                      width: 100,
+                      height: 50,
+                      child: Image.asset(
+                        'assets/text_icon.png',
+                        width: 200,
+                        height: 100,
+                      ),
                     ),
-                  ),
 
-                  // Welcome Text
-                  Text(
-                    'Welcome back!',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.5,
+                    // Welcome Text
+                    Text(
+                      'Welcome back!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.5,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 24),
+                    SizedBox(height: 24),
 
-                  // Username Field
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Username',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
+                    // Username Field
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Username',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        child: TextField(
-                          controller: _usernameController,
-                          style: TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: 'Enter user name',
-                            hintStyle: TextStyle(
-                              color: Colors.white.withOpacity(0.6),
-                              fontSize: 14,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 16,
+                        SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.2),
                             ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 20),
-
-                  // Password Field
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Password',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
-                          ),
-                        ),
-                        child: TextField(
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          style: TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: 'Enter your password',
-                            hintStyle: TextStyle(
-                              color: Colors.white.withOpacity(0.6),
-                              fontSize: 14,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 16,
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
+                          child: TextField(
+                            controller: _usernameController,
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              hintText: 'Enter user name',
+                              hintStyle: TextStyle(
                                 color: Colors.white.withOpacity(0.6),
+                                fontSize: 14,
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 16,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  SizedBox(height: 16),
+                    SizedBox(height: 20),
 
-                  // Forgot Password
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (context) => ForgotPasswordScreen()),
-                        );
-                      },
-                      child: Text(
-                        'Forgot Password?',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
+                    // Password Field
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Password',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Utils.passwordTextField(
+                          passwordController: _passwordController,
+                          hint: 'Enter your password',
+                          obscurePassword: _obscurePassword,
+                          onToggleVisibility: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        )
+                      ],
+                    ),
+
+                    SizedBox(height: 16),
+
+                    // Forgot Password
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) => ForgotPasswordScreen()),
+                          );
+                        },
+                        child: Text(
+                          'Forgot Password?',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  SizedBox(height: 24),
+                    SizedBox(height: 24),
 
-                  // Login and Sign-up buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
+                    // Login and Sign-up buttons
+                    Row(
+                      children: [
+                        Utils.button(
+                          text: 'Login',
                           onPressed: () {
-                            // Handle login
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      OtpVerificationScreen()),
+                            );
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF7C3AED),
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            'Login',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                         ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
+                        SizedBox(width: 12),
+                        Utils.button(
+                          text: 'Sign Up',
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                   builder: (context) => SignUpScreen()),
                             );
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF6366F1),
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            'Sign-up',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:goodchannel/widgets/utils.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -187,7 +188,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           elevation: 0,
                         ),
                         child: Text(
-                          'Sign Up',
+                          'Choose Plan',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -202,27 +203,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ),
 
           // Back Button
-          Positioned(
-            top: 30,
-            left: 20,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Container(
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  // color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.arrow_back_ios_new,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-            ),
-          ),
+          Utils.backButton(context),
         ],
       ),
     );

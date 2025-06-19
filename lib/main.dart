@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:goodchannel/screens/splash_screen.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:flutter/services.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
-  runApp(const MyApp());
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]).then((_) {
+    runApp(MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
