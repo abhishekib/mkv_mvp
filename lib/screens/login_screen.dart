@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:goodchannel/screens/sign_up_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -89,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Logo/Icon
-                  Container(
+                  SizedBox(
                     width: 100,
                     height: 50,
                     child: Image.asset(
@@ -260,7 +261,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            // Handle sign up
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (context) => SignUpScreen()),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF6366F1),
