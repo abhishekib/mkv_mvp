@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:goodchannel/player_control_widget.dart';
-import 'package:goodchannel/video_list_widget.dart';
-import 'package:goodchannel/video_player_widget.dart';
-import 'package:goodchannel/video_service.dart';
-import 'package:goodchannel/video_viewmodel.dart';
+import 'package:goodchannel/widgets/player_control_widget.dart';
+import 'package:goodchannel/widgets/video_list_widget.dart';
+import 'package:goodchannel/widgets/video_player_widget.dart';
+import 'package:goodchannel/services/video_service.dart';
+import 'package:goodchannel/viewmodels/video_viewmodel.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   const VideoPlayerScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:goodchannel/video_model.dart';
-import 'package:goodchannel/video_service.dart';
+import 'package:goodchannel/models/video_model.dart';
+import 'package:goodchannel/services/video_service.dart';
 
 class VideoViewModel extends ChangeNotifier {
   final VideoService _videoService = VideoService();

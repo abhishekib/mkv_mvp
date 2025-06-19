@@ -1,4 +1,4 @@
-import 'package:goodchannel/video_model.dart';
+import 'package:goodchannel/models/video_model.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';

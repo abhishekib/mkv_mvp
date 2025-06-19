@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:goodchannel/video_player_screen.dart';
+import 'package:goodchannel/screens/login_screen.dart';
+import 'package:goodchannel/screens/video_player_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -42,7 +43,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     Timer(const Duration(seconds: 3), () {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const VideoPlayerScreen()),
+        MaterialPageRoute(builder: (context) => LoginScreen()),
       );
     });
   }

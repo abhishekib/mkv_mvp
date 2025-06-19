@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:goodchannel/video_model.dart';
+import 'package:goodchannel/models/video_model.dart';
 
 class PlayerControlsWidget extends StatelessWidget {
   final PlayerState state;

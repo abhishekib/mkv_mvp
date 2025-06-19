@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:goodchannel/video_model.dart';
-import 'package:goodchannel/video_service.dart';
+import 'package:goodchannel/models/video_model.dart';
+import 'package:goodchannel/services/video_service.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
@@ -60,7 +60,7 @@ class VideoPlayerWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (state.isBuffering) 
+            if (state.isBuffering)
               const CircularProgressIndicator(
                 color: Colors.white,
                 strokeWidth: 3,
@@ -80,7 +80,7 @@ class VideoPlayerWidget extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            if (state.isBuffering) 
+            if (state.isBuffering)
               const Padding(
                 padding: EdgeInsets.only(top: 8),
                 child: Text(
