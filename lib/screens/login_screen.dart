@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:goodchannel/screens/forgot_screen.dart';
 import 'package:goodchannel/screens/sign_up_screen.dart';
 
 void main() {
@@ -217,7 +218,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        // Handle forgot password
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (context) => ForgotPasswordScreen()),
+                        );
                       },
                       child: Text(
                         'Forgot Password?',
