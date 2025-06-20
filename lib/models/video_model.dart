@@ -1,63 +1,33 @@
-class VideoItem {
+class VideoModel {
   final String name;
-  final String url;
-  final bool isHttp;
-  final VideoType type;
+  final String logoUrl;
+  final String streamUrl;
+  final String groupTitle;
 
-  VideoItem({
+  VideoModel({
     required this.name,
-    required this.url,
-    this.isHttp = false,
-    this.type = VideoType.remote,
-  });
-}
-
-enum VideoType {
-  remote,
-  local,
-  stream,
-}
-
-class PlayerState {
-  final String currentSource;
-  final bool isPlaying;
-  final bool isFullscreen;
-  final double playbackSpeed;
-  final bool usingVlcFallback;
-  final bool isBuffering;
-  final bool hasError;
-  final String? errorMessage;
-
-  const PlayerState({
-    this.currentSource = 'No video selected',
-    this.isPlaying = false,
-    this.isFullscreen = false,
-    this.playbackSpeed = 1.0,
-    this.usingVlcFallback = false,
-    this.isBuffering = false,
-    this.hasError = false,
-    this.errorMessage,
+    required this.logoUrl,
+    required this.streamUrl,
+    required this.groupTitle,
   });
 
-  PlayerState copyWith({
-    String? currentSource,
-    bool? isPlaying,
-    bool? isFullscreen,
-    double? playbackSpeed,
-    bool? usingVlcFallback,
-    bool? isBuffering,
-    bool? hasError,
-    String? errorMessage,
-  }) {
-    return PlayerState(
-      currentSource: currentSource ?? this.currentSource,
-      isPlaying: isPlaying ?? this.isPlaying,
-      isFullscreen: isFullscreen ?? this.isFullscreen,
-      playbackSpeed: playbackSpeed ?? this.playbackSpeed,
-      usingVlcFallback: usingVlcFallback ?? this.usingVlcFallback,
-      isBuffering: isBuffering ?? this.isBuffering,
-      hasError: hasError ?? this.hasError,
-      errorMessage: errorMessage ?? this.errorMessage,
+  // Factory constructor to create an instance from a map
+  factory VideoModel.fromMap(Map<String, dynamic> map) {
+    return VideoModel(
+      name: map['name'],
+      logoUrl: map['logoUrl'],
+      streamUrl: map['streamUrl'],
+      groupTitle: map['groupTitle'],
     );
+  }
+
+  // Method to convert the object to a map (for sending in API requests, if needed)
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'logoUrl': logoUrl,
+      'streamUrl': streamUrl,
+      'groupTitle': groupTitle,
+    };
   }
 }
