@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_vlc_player/flutter_vlc_player.dart';
-import 'package:goodchannel/screens/channel_list_screen.dart';
+import 'package:flutter/services.dart';
 import 'package:goodchannel/screens/splash_screen.dart';
 import 'package:goodchannel/services/api_service.dart';
 import 'package:goodchannel/services/auth_service.dart';
 import 'package:goodchannel/viewmodels/auth_viewmodel.dart';
+import 'package:goodchannel/viewmodels/video_viewmodel.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -23,6 +22,7 @@ void main() async {
       MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => authViewModel),
+          ChangeNotifierProvider(create: (_) => VideoPlayerViewModel()),
           // Add other providers as needed
         ],
         child: const MyApp(),
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const ChannelListScreen(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

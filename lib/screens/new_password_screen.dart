@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:goodchannel/screens/login_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
 
 class NewPasswordScreen extends StatefulWidget {
@@ -121,6 +122,11 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                                   "New Password: ${newPasswordController.text}");
                               debugPrint(
                                   "Confirm Password: ${confirmPasswordController.text}");
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) => LoginScreen(),
+                                ),
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF7C3AED),

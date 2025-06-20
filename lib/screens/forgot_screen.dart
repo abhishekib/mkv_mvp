@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:goodchannel/screens/new_password_screen.dart';
+import 'package:goodchannel/screens/otp_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -137,7 +138,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             // Handle continue action
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                  builder: (context) => NewPasswordScreen()),
+                                builder: (context) => OtpVerificationScreen(),
+                              ),
                             );
                           },
                           style: ElevatedButton.styleFrom(

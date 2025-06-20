@@ -1,80 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:goodchannel/viewmodels/video_viewmodel.dart';
 import 'package:provider/provider.dart';
-import '../../models/video/channel_model.dart';
+
 import '../../viewmodels/auth_viewmodel.dart';
-import '../video/video_player_screen.dart';
+import 'video_player_screen.dart'; // Make sure this import is correct
 
-class ChannelListScreen extends StatefulWidget {
+class ChannelListScreen extends StatelessWidget {
   const ChannelListScreen({super.key});
-
-  @override
-  State<ChannelListScreen> createState() => _ChannelListScreenState();
-}
-
-class _ChannelListScreenState extends State<ChannelListScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadChannels();
-  }
-
-  Future<void> _loadChannels() async {
-    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-    if (authViewModel.playlist == null) {
-      await authViewModel.fetchPlaylist('b81855cb72', 'be8622a3cb0e');
-    }
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Channel List'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadChannels,
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Search channels',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-              onChanged: (value) {
-                setState(() => _searchQuery = value.toLowerCase());
-              },
-            ),
-          ),
-          Expanded(
-            child: _buildChannelList(authViewModel),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Channels')),
+      body: _buildBody(context, authViewModel),
     );
   }
 
-  Widget _buildChannelList(AuthViewModel viewModel) {
+  Widget _buildBody(BuildContext context, AuthViewModel viewModel) {
     if (viewModel.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -84,50 +28,45 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
     }
 
     if (viewModel.playlist == null || viewModel.playlist!.channels.isEmpty) {
-      return const Center(child: Text('No channels available'));
-    }
-
-    final filteredChannels = viewModel.playlist!.channels.where((channel) {
-      return channel.name.toLowerCase().contains(_searchQuery) ||
-          channel.groupTitle.toLowerCase().contains(_searchQuery);
-    }).toList();
-
-    if (filteredChannels.isEmpty) {
-      return const Center(child: Text('No channels match your search'));
+      return Center(
+        child: ElevatedButton(
+          onPressed: () =>
+              viewModel.fetchPlaylist('b81855cb72', 'be8622a3cb0e'),
+          child: const Text('Load Channels'),
+        ),
+      );
     }
 
     return ListView.builder(
-      itemCount: filteredChannels.length,
+      itemCount: viewModel.playlist!.channels.length,
       itemBuilder: (context, index) {
-        final channel = filteredChannels[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-          child: ListTile(
-            leading: channel.logo.isNotEmpty
-                ? Image.network(
-                    channel.logo,
-                    width: 40,
-                    height: 40,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.tv),
-                  )
-                : const Icon(Icons.tv),
-            title: Text(channel.name),
-            subtitle: Text(channel.groupTitle),
-            trailing: const Icon(Icons.play_arrow),
-            onTap: () {
-              debugPrint('---> Video Screen <---');
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => VideoPlayerScreen(
-                    videoUrl: channel.url,
-                    channelName: channel.name,
+        final channel = viewModel.playlist!.channels[index];
+        return ListTile(
+          leading: channel.logo.isNotEmpty
+              ? Image.network(channel.logo, width: 40, height: 40)
+              : const Icon(Icons.tv),
+          title: Text(channel.name),
+          subtitle: Text(channel.groupTitle),
+          onTap: () async {
+            try {
+              final vm = context.read<VideoPlayerViewModel>();
+              vm.initializePlayer(channel.url).then((_) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => VideoPlayerScreen(
+                      videoUrl: channel.url,
+                      channelName: channel.name,
+                    ),
                   ),
-                ),
+                );
+              });
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error: ${e.toString()}')),
               );
-            },
-          ),
+            }
+          },
         );
       },
     );
