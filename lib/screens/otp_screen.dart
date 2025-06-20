@@ -39,95 +39,100 @@ class OtpVerificationScreen extends StatelessWidget {
                 ),
               ),
               child: Center(
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  padding: const EdgeInsets.all(24),
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(24.0),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
-                      width: 1,
+                child: SingleChildScrollView(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 25),
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 30, horizontal: 0),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(24.0),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.2),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 16),
-                        child: CircleAvatar(
-                          backgroundColor: Colors.transparent,
-                          radius: 28,
-                          backgroundImage: AssetImage('assets/logo.png'),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image(
+                          image: AssetImage('assets/text_icon.png'),
+                          height: 70,
+                          width: 200,
                         ),
-                      ),
-                      const Text(
-                        "Please Enter the OTP here",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        "Please enter your unique one time password here for verification.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white70, fontSize: 14),
-                      ),
-                      const SizedBox(height: 24),
-
-                      /// Pinput Widget here
-                      Pinput(
-                        controller: otpController,
-                        length: 4,
-                        defaultPinTheme: defaultPinTheme,
-                        focusedPinTheme: defaultPinTheme.copyWith(
-                          decoration: defaultPinTheme.decoration!.copyWith(
-                            border: Border.all(color: Colors.white70),
+                        const Text(
+                          "Please Enter the OTP here",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        submittedPinTheme: defaultPinTheme.copyWith(
-                          decoration: defaultPinTheme.decoration!.copyWith(
-                            color: Colors.white24,
-                          ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          "Please enter your unique one time password here for verification.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white70, fontSize: 14),
                         ),
-                        keyboardType: TextInputType.number,
-                        showCursor: true,
-                        onCompleted: (value) {
-                          debugPrint("OTP Completed: $value");
-                        },
-                      ),
+                        const SizedBox(height: 24),
 
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            debugPrint("Entered OTP: ${otpController.text}");
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF7C3AED),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                        /// Pinput Widget here
+                        Pinput(
+                          controller: otpController,
+                          length: 4,
+                          defaultPinTheme: defaultPinTheme,
+                          focusedPinTheme: defaultPinTheme.copyWith(
+                            decoration: defaultPinTheme.decoration!.copyWith(
+                              border: Border.all(color: Colors.white70),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child: const Text(
-                            "Verify",
-                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          submittedPinTheme: defaultPinTheme.copyWith(
+                            decoration: defaultPinTheme.decoration!.copyWith(
+                              color: Colors.white24,
+                            ),
+                          ),
+                          keyboardType: TextInputType.number,
+                          showCursor: true,
+                          onCompleted: (value) {
+                            debugPrint("OTP Completed: $value");
+                          },
+                        ),
+
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              debugPrint("Entered OTP: ${otpController.text}");
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF7C3AED),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                            child: const Text(
+                              "Verify",
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.white),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                        SizedBox(
+                          height: 20,
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
