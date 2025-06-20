@@ -55,7 +55,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 30),
                 child: Container(
                   constraints: BoxConstraints(maxWidth: 600),
-                  padding: EdgeInsets.all(32.0),
+                  padding:
+                      EdgeInsets.only(left: 32.0, right: 32.0, bottom: 32.0),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(24.0),
@@ -76,14 +77,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     children: [
                       // Logo
                       SizedBox(
-                        width: 100,
-                        height: 50,
+                        width: 200,
+                        height: 80,
                         child: Image.asset(
                           'assets/text_icon.png',
                           width: 200,
-                          height: 100,
+                          height: 110,
                         ),
                       ),
+
                       // Title
                       Text(
                         'Sign Up for Exclusive Updates!',

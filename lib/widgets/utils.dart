@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
 class Utils {
-  static Container passwordTextField({
-    required TextEditingController passwordController,
+  static Container textField({
+    required TextEditingController controller,
     required String hint,
-    required bool obscurePassword,
-    required VoidCallback onToggleVisibility,
+    bool isPassword = false,
+    bool obscureText = false,
+    VoidCallback? onToggleVisibility,
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+    Widget? prefixIcon,
+    String? Function(String?)? validator,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -16,11 +21,13 @@ class Utils {
         ),
       ),
       child: TextField(
-        controller: passwordController,
-        obscureText: obscurePassword,
+        controller: controller,
+        obscureText: obscureText && isPassword,
         style: TextStyle(color: Colors.white),
+        keyboardType: keyboardType,
+        maxLines: maxLines,
         decoration: InputDecoration(
-          hintText: 'Enter your password',
+          hintText: hint,
           hintStyle: TextStyle(
             color: Colors.white.withOpacity(0.6),
             fontSize: 14,
@@ -30,13 +37,16 @@ class Utils {
             horizontal: 16,
             vertical: 16,
           ),
-          suffixIcon: IconButton(
-            icon: Icon(
-              obscurePassword ? Icons.visibility_off : Icons.visibility,
-              color: Colors.white.withOpacity(0.6),
-            ),
-            onPressed: onToggleVisibility,
-          ),
+          prefixIcon: prefixIcon,
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.white.withOpacity(0.6),
+                  ),
+                  onPressed: onToggleVisibility,
+                )
+              : null,
         ),
       ),
     );
@@ -47,13 +57,10 @@ class Utils {
       top: 30,
       left: 20,
       child: GestureDetector(
-        onTap: () {
-          Navigator.pop(context);
-        },
+        onTap: () => Navigator.pop(context),
         child: Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            // color: Colors.white.withOpacity(0.2),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
@@ -66,21 +73,20 @@ class Utils {
     );
   }
 
-  static Expanded button(
-      {required String text, required VoidCallback onPressed}) {
+  static Expanded button({
+    required String text,
+    required VoidCallback onPressed,
+    Color backgroundColor = const Color(0xFF7C3AED),
+    Color foregroundColor = Colors.white,
+    double verticalPadding = 16,
+  }) {
     return Expanded(
       child: ElevatedButton(
         onPressed: onPressed,
-        /* () {
-           Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => OtpVerificationScreen()),
-          ); 
-        },*/
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFF7C3AED),
-          foregroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(vertical: 16),
+          backgroundColor: backgroundColor,
+          foregroundColor: foregroundColor,
+          padding: EdgeInsets.symmetric(vertical: verticalPadding),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

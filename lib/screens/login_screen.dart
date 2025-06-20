@@ -5,31 +5,14 @@ import 'package:goodchannel/screens/otp_screen.dart';
 import 'package:goodchannel/screens/sign_up_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Login UI',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: 'Inter',
-      ),
-      home: LoginScreen(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -74,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 30),
               child: Container(
                 constraints: BoxConstraints(maxWidth: 600),
-                padding: EdgeInsets.all(32.0),
+                padding: EdgeInsets.only(left: 32.0, right: 32.0, bottom: 32.0),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(24.0),
@@ -95,12 +78,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     // Logo/Icon
                     SizedBox(
-                      width: 100,
-                      height: 50,
+                      width: 200,
+                      height: 80,
                       child: Image.asset(
                         'assets/text_icon.png',
                         width: 200,
-                        height: 100,
+                        height: 110,
                       ),
                     ),
 
@@ -114,7 +97,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         letterSpacing: -0.5,
                       ),
                     ),
-                    SizedBox(height: 24),
 
                     // Username Field
                     Column(
@@ -130,30 +112,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         SizedBox(height: 8),
                         Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
-                            ),
-                          ),
-                          child: TextField(
-                            controller: _usernameController,
-                            style: TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              hintText: 'Enter user name',
-                              hintStyle: TextStyle(
-                                color: Colors.white.withOpacity(0.6),
-                                fontSize: 14,
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 16,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
                               ),
                             ),
-                          ),
-                        ),
+                            child: Utils.textField(
+                              controller: _usernameController,
+                              hint: 'Enter your Username',
+                            )),
                       ],
                     ),
 
@@ -172,10 +141,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         SizedBox(height: 8),
-                        Utils.passwordTextField(
-                          passwordController: _passwordController,
-                          hint: 'Enter your password',
-                          obscurePassword: _obscurePassword,
+                        Utils.textField(
+                          controller: _passwordController,
+                          hint: 'Enter your Password',
+                          keyboardType: TextInputType.visiblePassword,
+                          isPassword: true,
+                          obscureText: _obscurePassword,
                           onToggleVisibility: () {
                             setState(() {
                               _obscurePassword = !_obscurePassword;

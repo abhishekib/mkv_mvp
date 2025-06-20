@@ -88,15 +88,10 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                               ),
                             )),
                         const SizedBox(height: 8),
-                        Utils.passwordTextField(
-                          passwordController: newPasswordController,
-                          hint: "Enter your new password here",
-                          obscurePassword: obscureNewPassword,
-                          onToggleVisibility: () {
-                            setState(() {
-                              obscureNewPassword = !obscureNewPassword;
-                            });
-                          },
+                        Utils.textField(
+                          controller: newPasswordController,
+                          hint: 'Enter your new Password here',
+                          keyboardType: TextInputType.emailAddress,
                         ),
                         const SizedBox(height: 20),
                         Align(
@@ -110,15 +105,11 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                               ),
                             )),
                         const SizedBox(height: 8),
-                        Utils.passwordTextField(
-                          passwordController: confirmPasswordController,
-                          hint: "Retype your new password here",
-                          obscurePassword: obscureConfirmPassword,
-                          onToggleVisibility: () {
-                            setState(() {
-                              obscureConfirmPassword = !obscureConfirmPassword;
-                            });
-                          },
+                        Utils.textField(
+                          controller: confirmPasswordController,
+                          hint: 'Retype you Password here',
+                          keyboardType: TextInputType.emailAddress,
+                          isPassword: true,
                         ),
                         const SizedBox(height: 30),
                         SizedBox(
@@ -140,7 +131,8 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                             ),
                             child: const Text(
                               "Update Password",
-                              style: TextStyle(fontSize: 16, color: Colors.white),
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.white),
                             ),
                           ),
                         ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:goodchannel/screens/video_list_screen.dart';
+import 'package:goodchannel/screens/video_player_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
 import 'package:pinput/pinput.dart';
 
@@ -113,6 +115,11 @@ class OtpVerificationScreen extends StatelessWidget {
                           child: ElevatedButton(
                             onPressed: () {
                               debugPrint("Entered OTP: ${otpController.text}");
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) => VideoListScreen(),
+                                ),
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF7C3AED),
