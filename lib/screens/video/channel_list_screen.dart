@@ -1,74 +1,150 @@
 import 'package:flutter/material.dart';
-import 'package:goodchannel/viewmodels/video_viewmodel.dart';
+import 'package:goodchannel/models/channel_model.dart';
+import 'package:goodchannel/provider/channel_provider.dart';
 import 'package:provider/provider.dart';
+import 'player_screen.dart';
 
-import '../../viewmodels/auth_viewmodel.dart';
-import 'video_player_screen.dart'; // Make sure this import is correct
+class ChannelListScreen extends StatefulWidget {
+  const ChannelListScreen({Key? key}) : super(key: key);
 
-class ChannelListScreen extends StatelessWidget {
-  const ChannelListScreen({super.key});
+  @override
+  State<ChannelListScreen> createState() => _ChannelListScreenState();
+}
+
+class _ChannelListScreenState extends State<ChannelListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ChannelProvider>().fetchChannels();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final authViewModel = Provider.of<AuthViewModel>(context);
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Channels')),
-      body: _buildBody(context, authViewModel),
+      appBar: AppBar(
+        title: const Text('Live Channels'),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+        elevation: 2,
+      ),
+      body: Consumer<ChannelProvider>(
+        builder: (context, channelProvider, child) {
+          if (channelProvider.isLoading) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Loading channels...'),
+                ],
+              ),
+            );
+          }
+
+          if (channelProvider.error.isNotEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.red[300],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: ${channelProvider.error}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => ChannelProvider().fetchChannels(),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (channelProvider.channels.isEmpty) {
+            return const Center(
+              child: Text('No channels available'),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () => channelProvider.fetchChannels(),
+            child: ListView.builder(
+              itemCount: channelProvider.channels.length,
+              itemBuilder: (context, index) {
+                final channel = channelProvider.channels[index];
+                return ChannelTile(
+                  channel: channel,
+                  onTap: () => _navigateToPlayer(context, channel),
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildBody(BuildContext context, AuthViewModel viewModel) {
-    if (viewModel.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+  void _navigateToPlayer(BuildContext context, Channel channel) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PlayerScreen(channel: channel),
+      ),
+    );
+  }
+}
 
-    if (viewModel.error != null) {
-      return Center(child: Text('Error: ${viewModel.error}'));
-    }
+class ChannelTile extends StatelessWidget {
+  final Channel channel;
+  final VoidCallback onTap;
 
-    if (viewModel.playlist == null || viewModel.playlist!.channels.isEmpty) {
-      return Center(
-        child: ElevatedButton(
-          onPressed: () =>
-              viewModel.fetchPlaylist('b81855cb72', 'be8622a3cb0e'),
-          child: const Text('Load Channels'),
+  const ChannelTile({
+    Key? key,
+    required this.channel,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      elevation: 2,
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.deepPurple[100],
+          backgroundImage:
+              channel.logo.isNotEmpty ? NetworkImage(channel.logo) : null,
+          child: channel.logo.isEmpty
+              ? Icon(Icons.tv, color: Colors.deepPurple)
+              : null,
         ),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: viewModel.playlist!.channels.length,
-      itemBuilder: (context, index) {
-        final channel = viewModel.playlist!.channels[index];
-        return ListTile(
-          leading: channel.logo.isNotEmpty
-              ? Image.network(channel.logo, width: 40, height: 40)
-              : const Icon(Icons.tv),
-          title: Text(channel.name),
-          subtitle: Text(channel.groupTitle),
-          onTap: () async {
-            try {
-              final vm = context.read<VideoPlayerViewModel>();
-              vm.initializePlayer(channel.url).then((_) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => VideoPlayerScreen(
-                      videoUrl: channel.url,
-                      channelName: channel.name,
-                    ),
-                  ),
-                );
-              });
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error: ${e.toString()}')),
-              );
-            }
-          },
-        );
-      },
+        title: Text(
+          channel.name,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+        ),
+        subtitle: Text(
+          channel.group.isNotEmpty ? channel.group : 'Live TV',
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 14,
+          ),
+        ),
+        trailing: const Icon(Icons.play_circle_fill, color: Colors.deepPurple),
+        onTap: onTap,
+      ),
     );
   }
 }

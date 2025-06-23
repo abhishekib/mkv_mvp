@@ -1,4 +1,3 @@
-// viewmodels/video_player_viewmodel.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
@@ -16,12 +15,16 @@ class VideoPlayerViewModel extends ChangeNotifier {
   VlcPlayerController? get controller => _controller;
 
   Future<void> initializePlayer(String videoUrl) async {
-    try {
-      // Clean up existing controller if any
-      if (_controller != null) {
-        _controller!.dispose();
-      }
+    _isInitialized = false;
+    _isPlaying = false;
+    _isBuffering = false;
+    _errorMessage = null;
+    notifyListeners();
 
+    // Dispose previous controller safely
+    await _safeDispose();
+
+    try {
       _controller = VlcPlayerController.network(
         videoUrl,
         hwAcc: HwAcc.full,
@@ -36,6 +39,7 @@ class VideoPlayerViewModel extends ChangeNotifier {
       _controller!.addListener(_playerStateListener);
 
       await _controller!.initialize();
+
       _isInitialized = true;
       _errorMessage = null;
     } catch (e) {
@@ -48,13 +52,24 @@ class VideoPlayerViewModel extends ChangeNotifier {
   void _playerStateListener() {
     if (_controller == null) return;
 
-    _isPlaying = _controller!.value.isPlaying;
-    _isBuffering = _controller!.value.isBuffering;
+    final value = _controller!.value;
 
-    if (_controller!.value.hasError) {
-      _errorMessage = _controller!.value.errorDescription;
+    bool stateChanged = false;
+
+    if (_isPlaying != value.isPlaying) {
+      _isPlaying = value.isPlaying;
+      stateChanged = true;
     }
-    notifyListeners();
+    if (_isBuffering != value.isBuffering) {
+      _isBuffering = value.isBuffering;
+      stateChanged = true;
+    }
+    if (value.hasError && _errorMessage != value.errorDescription) {
+      _errorMessage = value.errorDescription;
+      stateChanged = true;
+    }
+
+    if (stateChanged) notifyListeners();
   }
 
   void togglePlayPause() {
@@ -63,15 +78,30 @@ class VideoPlayerViewModel extends ChangeNotifier {
   }
 
   Future<void> retryInitialization(String videoUrl) async {
-    _isInitialized = false;
-    _errorMessage = null;
-    notifyListeners();
     await initializePlayer(videoUrl);
   }
 
+  Future<void> _safeDispose() async {
+    try {
+      if (_controller != null) {
+        try {
+          // Only try to dispose if _viewId exists and is not null
+          final viewId = (_controller as dynamic)._viewId;
+          if (viewId != null) {
+            _controller?.removeListener(_playerStateListener);
+            await _controller?.dispose();
+          }
+        } catch (e) {
+          // Swallow NoSuchMethodError, it's fine
+        }
+        _controller = null;
+      }
+    } catch (_) {}
+  }
+
+  @override
   void dispose() {
-    _controller?.removeListener(_playerStateListener);
-    _controller?.dispose();
+    _safeDispose();
     super.dispose();
   }
 }
