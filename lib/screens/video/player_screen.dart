@@ -16,76 +16,96 @@ class PlayerScreen extends StatefulWidget {
 
 class _PlayerScreenState extends State<PlayerScreen> {
   bool _showControls = true;
+  bool _isInitializing = true;
+  // late PlayerProvider _playerProvider;
 
   @override
   void initState() {
     super.initState();
+    // _playerProvider = context.read<PlayerProvider>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PlayerProvider>().initializePlayer(widget.channel.url);
+      // _playerProvider.initializePlayer(widget.channel.url);
+      _initializePlayer();
     });
+
+    // Hide controls after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _showControls = false);
+    });
+  }
+
+  Future<void> _initializePlayer() async {
+    try {
+      setState(() => _isInitializing = true);
+      await context.read<PlayerProvider>().initializePlayer(widget.channel.url);
+    } finally {
+      if (mounted) {
+        setState(() => _isInitializing = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PlayerProvider>(
-      builder: (context, playerProvider, child) {
-        return Scaffold(
-          backgroundColor: Colors.black,
-          body: playerProvider.isFullScreen
-              ? _buildFullScreenPlayer(playerProvider)
-              : _buildNormalPlayer(playerProvider),
-        );
-      },
-    );
+    return _isInitializing
+        ? const Center(child: CircularProgressIndicator())
+        : Consumer<PlayerProvider>(
+            builder: (context, playerProvider, child) {
+              return Scaffold(
+                backgroundColor: Colors.black,
+                body: _buildPlayerBody(playerProvider),
+              );
+            },
+          );
   }
 
-  Widget _buildNormalPlayer(PlayerProvider playerProvider) {
-    return Column(
+  Widget _buildPlayerBody(PlayerProvider playerProvider) {
+    if (playerProvider.error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              playerProvider.error!,
+              style: const TextStyle(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () =>
+                  playerProvider.initializePlayer(widget.channel.url),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Stack(
       children: [
-        AppBar(
-          title: Text(widget.channel.name),
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-        ),
-        Expanded(
-          child: _buildVideoPlayer(playerProvider),
-        ),
-        _buildControlsPanel(playerProvider),
+        _buildVideoPlayer(playerProvider),
+        if (_showControls || playerProvider.isBuffering)
+          _buildControlsOverlay(playerProvider),
+        if (playerProvider.isBuffering)
+          const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          ),
       ],
     );
   }
 
-  Widget _buildFullScreenPlayer(PlayerProvider playerProvider) {
+  Widget _buildVideoPlayer(PlayerProvider playerProvider) {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _showControls = !_showControls;
-        });
+        setState(() => _showControls = !_showControls);
         if (_showControls) {
           Future.delayed(const Duration(seconds: 3), () {
-            if (mounted) {
-              setState(() {
-                _showControls = false;
-              });
-            }
+            if (mounted) setState(() => _showControls = false);
           });
         }
       },
-      child: Stack(
-        children: [
-          _buildVideoPlayer(playerProvider),
-          if (_showControls) _buildFullScreenControls(playerProvider),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVideoPlayer(PlayerProvider playerProvider) {
-    return Container(
-      width: double.infinity,
-      height: playerProvider.isFullScreen 
-          ? MediaQuery.of(context).size.height 
-          : 250,
       child: playerProvider.controller != null
           ? VlcPlayer(
               controller: playerProvider.controller!,
@@ -100,183 +120,178 @@ class _PlayerScreenState extends State<PlayerScreen> {
     );
   }
 
-  Widget _buildControlsPanel(PlayerProvider playerProvider) {
+  Widget _buildControlsOverlay(PlayerProvider playerProvider) {
     return Container(
-      color: Colors.grey[900],
-      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.black.withOpacity(0.7),
+            Colors.transparent,
+            Colors.transparent,
+            Colors.black.withOpacity(0.7),
+          ],
+        ),
+      ),
       child: Column(
         children: [
-          _buildPlaybackControls(playerProvider),
-          const SizedBox(height: 16),
-          _buildVolumeControl(playerProvider),
-          const SizedBox(height: 16),
-          _buildSpeedControl(playerProvider),
-          const SizedBox(height: 16),
-          _buildFullScreenButton(playerProvider),
+          AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                if (playerProvider.isFullScreen) {
+                  playerProvider.toggleFullScreen();
+                  _restorePortraitOrientation();
+                } else {
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            title: Text(
+              widget.channel.name,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+          const Spacer(),
+          if (!playerProvider.isBuffering) _buildPlayerControls(playerProvider),
         ],
       ),
     );
   }
 
-  Widget _buildPlaybackControls(PlayerProvider playerProvider) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  Widget _buildPlayerControls(PlayerProvider playerProvider) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          _buildProgressBar(playerProvider),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                icon:
+                    const Icon(Icons.replay_10, color: Colors.white, size: 30),
+                onPressed: () => _seekRelative(playerProvider, -10),
+              ),
+              IconButton(
+                icon: Icon(
+                  playerProvider.isPlaying ? Icons.pause : Icons.play_arrow,
+                  color: Colors.white,
+                  size: 40,
+                ),
+                onPressed: () {
+                  playerProvider.isPlaying
+                      ? playerProvider.pause()
+                      : playerProvider.play();
+                },
+              ),
+              IconButton(
+                icon:
+                    const Icon(Icons.forward_10, color: Colors.white, size: 30),
+                onPressed: () => _seekRelative(playerProvider, 10),
+              ),
+              IconButton(
+                icon: Icon(
+                  playerProvider.isFullScreen
+                      ? Icons.fullscreen_exit
+                      : Icons.fullscreen,
+                  color: Colors.white,
+                  size: 30,
+                ),
+                onPressed: () {
+                  playerProvider.toggleFullScreen();
+                  if (playerProvider.isFullScreen) {
+                    SystemChrome.setPreferredOrientations([
+                      DeviceOrientation.landscapeLeft,
+                      DeviceOrientation.landscapeRight,
+                    ]);
+                    SystemChrome.setEnabledSystemUIMode(
+                        SystemUiMode.immersiveSticky);
+                  } else {
+                    _restorePortraitOrientation();
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Inside your _buildProgressBar method in PlayerScreen
+  Widget _buildProgressBar(PlayerProvider playerProvider) {
+    // Ensure duration is valid before showing slider
+    if (playerProvider.duration.inSeconds <= 0) {
+      return const SizedBox(); // Return empty widget if duration isn't valid
+    }
+
+    return Column(
       children: [
-        IconButton(
-          onPressed: playerProvider.stop,
-          icon: const Icon(Icons.stop, color: Colors.white, size: 32),
+        Slider(
+          value: playerProvider.position.inSeconds.toDouble().clamp(
+                0.0,
+                playerProvider.duration.inSeconds.toDouble(),
+              ),
+          min: 0.0,
+          max: playerProvider.duration.inSeconds.toDouble(),
+          onChanged: (value) {
+            playerProvider.seekTo(Duration(seconds: value.toInt()));
+          },
+          onChangeEnd: (value) {
+            playerProvider.seekTo(Duration(seconds: value.toInt()));
+          },
+          activeColor: Colors.deepPurple,
+          inactiveColor: Colors.grey[600],
         ),
-        IconButton(
-          onPressed: playerProvider.isPlaying 
-              ? playerProvider.pause 
-              : playerProvider.play,
-          icon: Icon(
-            playerProvider.isPlaying ? Icons.pause : Icons.play_arrow,
-            color: Colors.white,
-            size: 48,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _formatDuration(playerProvider.position),
+                style: const TextStyle(color: Colors.white),
+              ),
+              Text(
+                _formatDuration(playerProvider.duration),
+                style: const TextStyle(color: Colors.white),
+              ),
+            ],
           ),
         ),
-        IconButton(
-          onPressed: () {
-            HapticFeedback.lightImpact();
-          },
-          icon: const Icon(Icons.skip_next, color: Colors.white, size: 32),
-        ),
       ],
     );
   }
 
-  Widget _buildVolumeControl(PlayerProvider playerProvider) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.volume_up, color: Colors.white),
-            const SizedBox(width: 8),
-            Text(
-              'Volume: ${playerProvider.volume.toInt()}%',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ],
-        ),
-        Slider(
-          value: playerProvider.volume,
-          min: 0,
-          max: 100,
-          divisions: 20,
-          activeColor: Colors.deepPurple,
-          inactiveColor: Colors.grey,
-          onChanged: playerProvider.setVolume,
-        ),
-      ],
-    );
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return [if (duration.inHours > 0) hours, minutes, seconds].join(':');
   }
 
-  Widget _buildSpeedControl(PlayerProvider playerProvider) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.speed, color: Colors.white),
-            const SizedBox(width: 8),
-            Text(
-              'Speed: ${playerProvider.playbackSpeed.toStringAsFixed(1)}x',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ],
-        ),
-        Slider(
-          value: playerProvider.playbackSpeed,
-          min: 0.25,
-          max: 2.0,
-          divisions: 7,
-          activeColor: Colors.deepPurple,
-          inactiveColor: Colors.grey,
-          onChanged: playerProvider.setPlaybackSpeed,
-        ),
-      ],
-    );
+  Future<void> _seekRelative(PlayerProvider playerProvider, int seconds) async {
+    final newPosition = playerProvider.position + Duration(seconds: seconds);
+    await playerProvider.seekTo(newPosition);
   }
 
-  Widget _buildFullScreenButton(PlayerProvider playerProvider) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () {
-          playerProvider.toggleFullScreen();
-          if (playerProvider.isFullScreen) {
-            SystemChrome.setPreferredOrientations([
-              DeviceOrientation.landscapeLeft,
-              DeviceOrientation.landscapeRight,
-            ]);
-            SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-          } else {
-            SystemChrome.setPreferredOrientations([
-              DeviceOrientation.portraitUp,
-            ]);
-            SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-          }
-        },
-        icon: Icon(playerProvider.isFullScreen 
-            ? Icons.fullscreen_exit 
-            : Icons.fullscreen),
-        label: Text(playerProvider.isFullScreen 
-            ? 'Exit Full Screen' 
-            : 'Full Screen'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.deepPurple,
-          foregroundColor: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFullScreenControls(PlayerProvider playerProvider) {
-    return Positioned(
-      bottom: 50,
-      left: 0,
-      right: 0,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-              onPressed: playerProvider.stop,
-              icon: const Icon(Icons.stop, color: Colors.white, size: 36),
-            ),
-            IconButton(
-              onPressed: playerProvider.isPlaying 
-                  ? playerProvider.pause 
-                  : playerProvider.play,
-              icon: Icon(
-                playerProvider.isPlaying ? Icons.pause : Icons.play_arrow,
-                color: Colors.white,
-                size: 48,
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                playerProvider.toggleFullScreen();
-                SystemChrome.setPreferredOrientations([
-                  DeviceOrientation.portraitUp,
-                ]);
-                SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-              },
-              icon: const Icon(Icons.fullscreen_exit, color: Colors.white, size: 36),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _restorePortraitOrientation() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
   @override
   void dispose() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    // _restorePortraitOrientation();
     super.dispose();
   }
 }

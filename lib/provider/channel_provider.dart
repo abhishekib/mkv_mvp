@@ -6,10 +6,12 @@ class ChannelProvider with ChangeNotifier {
   List<Channel> _channels = [];
   bool _isLoading = false;
   String _error = '';
+  String? _lastUpdated;
 
   List<Channel> get channels => _channels;
   bool get isLoading => _isLoading;
   String get error => _error;
+  String? get lastUpdated => _lastUpdated;
 
   Future<void> fetchChannels() async {
     _isLoading = true;
@@ -24,15 +26,16 @@ class ChannelProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         _channels = _parseM3U8(response.body);
         _error = '';
+        _lastUpdated = DateTime.now().toString();
       } else {
         _error = 'Failed to load channels: ${response.statusCode}';
       }
     } catch (e) {
       _error = 'Error fetching channels: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
   List<Channel> _parseM3U8(String content) {

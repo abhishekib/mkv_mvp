@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:goodchannel/models/channel_model.dart';
 import 'package:goodchannel/provider/channel_provider.dart';
+import 'package:goodchannel/provider/player_provider.dart';
 import 'package:provider/provider.dart';
 import 'player_screen.dart';
 
@@ -15,9 +16,12 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ChannelProvider>().fetchChannels();
-    });
+    // Load channels after the widget is initialized
+    Future.microtask(() => context.read<ChannelProvider>().fetchChannels());
+  }
+
+  Future<void> _refreshChannels() async {
+    await context.read<ChannelProvider>().fetchChannels();
   }
 
   @override
@@ -25,23 +29,17 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Live Channels'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        elevation: 2,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _refreshChannels,
+          ),
+        ],
       ),
       body: Consumer<ChannelProvider>(
         builder: (context, channelProvider, child) {
-          if (channelProvider.isLoading) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Loading channels...'),
-                ],
-              ),
-            );
+          if (channelProvider.isLoading && channelProvider.channels.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (channelProvider.error.isNotEmpty) {
@@ -49,20 +47,13 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red[300],
-                  ),
-                  const SizedBox(height: 16),
                   Text(
-                    'Error: ${channelProvider.error}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red),
+                    channelProvider.error,
+                    style: TextStyle(color: Colors.red[700]),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => ChannelProvider().fetchChannels(),
+                    onPressed: _refreshChannels,
                     child: const Text('Retry'),
                   ),
                 ],
@@ -70,14 +61,8 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
             );
           }
 
-          if (channelProvider.channels.isEmpty) {
-            return const Center(
-              child: Text('No channels available'),
-            );
-          }
-
           return RefreshIndicator(
-            onRefresh: () => channelProvider.fetchChannels(),
+            onRefresh: _refreshChannels,
             child: ListView.builder(
               itemCount: channelProvider.channels.length,
               itemBuilder: (context, index) {
@@ -94,7 +79,11 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
     );
   }
 
-  void _navigateToPlayer(BuildContext context, Channel channel) {
+  void _navigateToPlayer(BuildContext context, Channel channel) async {
+    // First pause any currently playing video
+    final playerProvider = context.read<PlayerProvider>();
+    await playerProvider.safeDispose();
+    // Then navigate to the new player screen
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -119,31 +108,47 @@ class ChannelTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       elevation: 2,
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.deepPurple[100],
-          backgroundImage:
-              channel.logo.isNotEmpty ? NetworkImage(channel.logo) : null,
-          child: channel.logo.isEmpty
-              ? Icon(Icons.tv, color: Colors.deepPurple)
-              : null,
-        ),
-        title: Text(
-          channel.name,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
-        ),
-        subtitle: Text(
-          channel.group.isNotEmpty ? channel.group : 'Live TV',
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 14,
-          ),
-        ),
-        trailing: const Icon(Icons.play_circle_fill, color: Colors.deepPurple),
+      child: InkWell(
         onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.deepPurple[100],
+                backgroundImage:
+                    channel.logo.isNotEmpty ? NetworkImage(channel.logo) : null,
+                child: channel.logo.isEmpty
+                    ? const Icon(Icons.tv, color: Colors.deepPurple)
+                    : null,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      channel.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    if (channel.group.isNotEmpty)
+                      Text(
+                        channel.group,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.play_circle_fill, color: Colors.deepPurple),
+            ],
+          ),
+        ),
       ),
     );
   }
