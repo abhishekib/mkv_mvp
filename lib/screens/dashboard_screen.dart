@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:goodchannel/screens/settings_screen.dart';
+import 'package:goodchannel/screens/video/channel_list_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -39,7 +40,13 @@ class DashboardScreen extends StatelessWidget {
                       alignment: WrapAlignment.center,
                       children: [
                         _buildFeatureButton(
-                            context, Icons.wifi_tethering, 'Live', true),
+                            context, Icons.wifi_tethering, 'Live', true,
+                            onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) => ChannelListScreen()),
+                          );
+                        }),
                         _buildFeatureButton(
                             context, Icons.movie, 'Movies', true),
                         _buildFeatureButton(

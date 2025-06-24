@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:goodchannel/screens/dashboard_screen.dart';
 import 'package:goodchannel/screens/forgot_screen.dart';
 import 'package:goodchannel/screens/sign_up_screen.dart';
 import 'package:goodchannel/screens/video/channel_list_screen.dart';
@@ -177,10 +178,8 @@ class LoginScreenState extends State<LoginScreen> {
                         Utils.button(
                           text: 'Login',
                           onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (context) => ChannelListScreen()),
-                            );
+                            Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) => DashboardScreen()));
                           },
                         ),
                         SizedBox(width: 12),
