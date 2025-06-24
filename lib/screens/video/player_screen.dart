@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
@@ -17,20 +19,30 @@ class PlayerScreen extends StatefulWidget {
 class _PlayerScreenState extends State<PlayerScreen> {
   bool _showControls = true;
   bool _isInitializing = true;
-  // late PlayerProvider _playerProvider;
+  Timer? _hideControlsTimer;
 
   @override
   void initState() {
     super.initState();
-    // _playerProvider = context.read<PlayerProvider>();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // _playerProvider.initializePlayer(widget.channel.url);
-      _initializePlayer();
-    });
+    _initializePlayer();
+    _startHideControlsTimer();
+  }
 
-    // Hide controls after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) setState(() => _showControls = false);
+  void _startHideControlsTimer() {
+    _hideControlsTimer?.cancel();
+    _hideControlsTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted && _showControls) {
+        setState(() => _showControls = false);
+      }
+    });
+  }
+
+  void _toggleControlsVisibility() {
+    setState(() {
+      _showControls = !_showControls;
+      if (_showControls) {
+        _startHideControlsTimer();
+      }
     });
   }
 
@@ -43,6 +55,12 @@ class _PlayerScreenState extends State<PlayerScreen> {
         setState(() => _isInitializing = false);
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _hideControlsTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -74,8 +92,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () =>
-                  playerProvider.initializePlayer(widget.channel.url),
+              onPressed: () => _initializePlayer(),
               child: const Text('Retry'),
             ),
           ],
@@ -98,14 +115,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   Widget _buildVideoPlayer(PlayerProvider playerProvider) {
     return GestureDetector(
-      onTap: () {
-        setState(() => _showControls = !_showControls);
-        if (_showControls) {
-          Future.delayed(const Duration(seconds: 3), () {
-            if (mounted) setState(() => _showControls = false);
-          });
-        }
-      },
+      behavior: HitTestBehavior.opaque,
+      onTap: _toggleControlsVisibility,
       child: playerProvider.controller != null
           ? VlcPlayer(
               controller: playerProvider.controller!,
@@ -121,43 +132,51 @@ class _PlayerScreenState extends State<PlayerScreen> {
   }
 
   Widget _buildControlsOverlay(PlayerProvider playerProvider) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.black.withOpacity(0.7),
-            Colors.transparent,
-            Colors.transparent,
-            Colors.black.withOpacity(0.7),
-          ],
-        ),
-      ),
-      child: Column(
-        children: [
-          AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () {
-                if (playerProvider.isFullScreen) {
-                  playerProvider.toggleFullScreen();
-                  _restorePortraitOrientation();
-                } else {
-                  Navigator.pop(context);
-                }
-              },
-            ),
-            title: Text(
-              widget.channel.name,
-              style: const TextStyle(color: Colors.white),
+    return IgnorePointer(
+      ignoring: !_showControls,
+      child: AnimatedOpacity(
+        opacity: _showControls ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 300),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.7),
+                Colors.transparent,
+                Colors.transparent,
+                Colors.black.withOpacity(0.7),
+              ],
             ),
           ),
-          const Spacer(),
-          if (!playerProvider.isBuffering) _buildPlayerControls(playerProvider),
-        ],
+          child: Column(
+            children: [
+              AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () {
+                    if (playerProvider.isFullScreen) {
+                      playerProvider.toggleFullScreen();
+                      _restorePortraitOrientation();
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                title: Text(
+                  widget.channel.name,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+              const Spacer(),
+              if (!playerProvider.isBuffering)
+                _buildPlayerControls(playerProvider),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -175,7 +194,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
               IconButton(
                 icon:
                     const Icon(Icons.replay_10, color: Colors.white, size: 30),
-                onPressed: () => _seekRelative(playerProvider, -10),
+                onPressed: () {
+                  _seekRelative(playerProvider, -10);
+                  _startHideControlsTimer(); // Reset timer on interaction
+                },
               ),
               IconButton(
                 icon: Icon(
@@ -187,12 +209,16 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   playerProvider.isPlaying
                       ? playerProvider.pause()
                       : playerProvider.play();
+                  _startHideControlsTimer(); // Reset timer on interaction
                 },
               ),
               IconButton(
                 icon:
                     const Icon(Icons.forward_10, color: Colors.white, size: 30),
-                onPressed: () => _seekRelative(playerProvider, 10),
+                onPressed: () {
+                  _seekRelative(playerProvider, 10);
+                  _startHideControlsTimer(); // Reset timer on interaction
+                },
               ),
               IconButton(
                 icon: Icon(
@@ -214,6 +240,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   } else {
                     _restorePortraitOrientation();
                   }
+                  _startHideControlsTimer(); // Reset timer on interaction
                 },
               ),
             ],
@@ -223,11 +250,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
     );
   }
 
-  // Inside your _buildProgressBar method in PlayerScreen
   Widget _buildProgressBar(PlayerProvider playerProvider) {
-    // Ensure duration is valid before showing slider
     if (playerProvider.duration.inSeconds <= 0) {
-      return const SizedBox(); // Return empty widget if duration isn't valid
+      return const SizedBox();
     }
 
     return Column(
@@ -241,9 +266,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
           max: playerProvider.duration.inSeconds.toDouble(),
           onChanged: (value) {
             playerProvider.seekTo(Duration(seconds: value.toInt()));
+            _startHideControlsTimer(); // Reset timer on interaction
           },
           onChangeEnd: (value) {
             playerProvider.seekTo(Duration(seconds: value.toInt()));
+            _startHideControlsTimer(); // Reset timer on interaction
           },
           activeColor: Colors.deepPurple,
           inactiveColor: Colors.grey[600],
@@ -287,11 +314,5 @@ class _PlayerScreenState extends State<PlayerScreen> {
       DeviceOrientation.landscapeRight,
     ]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  }
-
-  @override
-  void dispose() {
-    // _restorePortraitOrientation();
-    super.dispose();
   }
 }
