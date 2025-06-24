@@ -13,14 +13,94 @@ class ChannelListScreen extends StatefulWidget {
 }
 
 class _ChannelListScreenState extends State<ChannelListScreen> {
+  final ScrollController _scrollController = ScrollController();
+  String _searchQuery = '';
+  bool _isSearching = false;
+  String _selectedCategory = 'All';
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() => context.read<ChannelProvider>().fetchChannels());
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   Future<void> _refreshChannels() async {
     await context.read<ChannelProvider>().fetchChannels();
+  }
+
+  Map<String, List<Channel>> _getGroupedChannels(List<Channel> channels) {
+    var filteredChannels = channels;
+
+    // Filter by search query
+    if (_searchQuery.isNotEmpty) {
+      filteredChannels = filteredChannels
+          .where((channel) =>
+              channel.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              channel.group.toLowerCase().contains(_searchQuery.toLowerCase()))
+          .toList();
+    }
+
+    // Group channels by category
+    Map<String, List<Channel>> groupedChannels = {};
+
+    for (var channel in filteredChannels) {
+      String group = channel.group.isEmpty ? 'Other' : channel.group;
+      if (!groupedChannels.containsKey(group)) {
+        groupedChannels[group] = [];
+      }
+      groupedChannels[group]!.add(channel);
+    }
+
+    // Filter by selected category
+    if (_selectedCategory != 'All') {
+      groupedChannels = {
+        _selectedCategory: groupedChannels[_selectedCategory] ?? []
+      };
+    }
+
+    // Sort groups alphabetically, but keep "FORMULA 1 + MOTO GP" first if it exists
+    var sortedGroups = groupedChannels.keys.toList();
+    sortedGroups.sort((a, b) {
+      if (a.contains('FORMULA') || a.contains('F1')) return -1;
+      if (b.contains('FORMULA') || b.contains('F1')) return 1;
+      if (a == 'Other') return 1;
+      if (b == 'Other') return -1;
+      return a.compareTo(b);
+    });
+
+    Map<String, List<Channel>> sortedGroupedChannels = {};
+    for (String group in sortedGroups) {
+      sortedGroupedChannels[group] = groupedChannels[group]!;
+    }
+
+    return sortedGroupedChannels;
+  }
+
+  List<String> _getAllCategories(List<Channel> channels) {
+    Set<String> categories = {'All'};
+    for (var channel in channels) {
+      String group = channel.group.isEmpty ? 'Other' : channel.group;
+      categories.add(group);
+    }
+
+    var sortedCategories = categories.toList();
+    sortedCategories.sort((a, b) {
+      if (a == 'All') return -1;
+      if (b == 'All') return 1;
+      if (a.contains('FORMULA') || a.contains('F1')) return -1;
+      if (b.contains('FORMULA') || b.contains('F1')) return 1;
+      if (a == 'Other') return 1;
+      if (b == 'Other') return -1;
+      return a.compareTo(b);
+    });
+
+    return sortedCategories;
   }
 
   @override
@@ -29,15 +109,50 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text(
-          'Live Channels',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
+        elevation: 0,
+        title: _isSearching
+            ? TextField(
+                autofocus: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: 'Search channels or categories...',
+                  hintStyle: TextStyle(color: Colors.grey),
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+              )
+            : const Text(
+                'Live Channels',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
         actions: [
+          if (_isSearching)
+            IconButton(
+              icon: const Icon(Icons.clear, color: Colors.white),
+              onPressed: () {
+                setState(() {
+                  _isSearching = false;
+                  _searchQuery = '';
+                });
+              },
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.search, color: Colors.white),
+              onPressed: () {
+                setState(() {
+                  _isSearching = true;
+                });
+              },
+            ),
           Container(
             margin: const EdgeInsets.only(right: 12),
             child: Row(
@@ -83,9 +198,16 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
                   Text(
                     channelProvider.error,
                     style: const TextStyle(color: Colors.red, fontSize: 16),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
@@ -101,22 +223,156 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
             );
           }
 
-          return RefreshIndicator(
-            onRefresh: _refreshChannels,
-            color: Colors.red,
-            backgroundColor: Colors.white,
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: channelProvider.channels.length,
-              itemBuilder: (context, index) {
-                final channel = channelProvider.channels[index];
-                return NewsChannelTile(
-                  channel: channel,
-                  onTap: () => _navigateToPlayer(context, channel),
-                );
-              },
-            ),
+          final groupedChannels = _getGroupedChannels(channelProvider.channels);
+          final totalChannels = groupedChannels.values
+              .fold(0, (sum, channels) => sum + channels.length);
+
+          return Column(
+            children: [
+              // Total channels count
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    Text(
+                      '$totalChannels channels in ${groupedChannels.length} categories',
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 14,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (channelProvider.isLoading)
+                      const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
+              Container(
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Consumer<ChannelProvider>(
+                  builder: (context, channelProvider, child) {
+                    final categories =
+                        _getAllCategories(channelProvider.channels);
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: categories.length,
+                      itemBuilder: (context, index) {
+                        final category = categories[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: ChoiceChip(
+                            label: Text(
+                              category,
+                              style: TextStyle(
+                                color: _selectedCategory == category
+                                    ? Colors.white
+                                    : Colors.grey[400],
+                                fontSize: 14,
+                              ),
+                            ),
+                            selected: _selectedCategory == category,
+                            selectedColor: Colors.red,
+                            backgroundColor: Colors.grey[900],
+                            onSelected: (selected) {
+                              setState(() {
+                                _selectedCategory = selected ? category : 'All';
+                              });
+                            },
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            showCheckmark: false,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+
+              // Category sections
+              Expanded(
+                child: groupedChannels.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              _searchQuery.isNotEmpty
+                                  ? Icons.search_off
+                                  : Icons.tv_off,
+                              color: Colors.grey[600],
+                              size: 48,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _searchQuery.isNotEmpty
+                                  ? 'No channels found for "$_searchQuery"'
+                                  : 'No channels available',
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 16,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _refreshChannels,
+                        color: Colors.red,
+                        backgroundColor: Colors.white,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          itemCount: groupedChannels.length,
+                          itemBuilder: (context, index) {
+                            final group = groupedChannels.keys.elementAt(index);
+                            final channels = groupedChannels[group]!;
+
+                            return CategorySection(
+                              title: group,
+                              channels: channels,
+                              onChannelTap: (channel) =>
+                                  _navigateToPlayer(context, channel),
+                            );
+                          },
+                        ),
+                      ),
+              ),
+            ],
           );
+        },
+      ),
+      floatingActionButton: Consumer<ChannelProvider>(
+        builder: (context, channelProvider, child) {
+          final groupedChannels = _getGroupedChannels(channelProvider.channels);
+          return groupedChannels.isNotEmpty
+              ? FloatingActionButton(
+                  onPressed: () {
+                    _scrollController.animateTo(
+                      0,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  backgroundColor: Colors.red,
+                  child:
+                      const Icon(Icons.keyboard_arrow_up, color: Colors.white),
+                )
+              : const SizedBox.shrink();
         },
       ),
     );
@@ -125,20 +381,112 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   void _navigateToPlayer(BuildContext context, Channel channel) async {
     final playerProvider = context.read<PlayerProvider>();
     await playerProvider.safeDispose();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PlayerScreen(channel: channel),
+
+    if (mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PlayerScreen(channel: channel),
+        ),
+      );
+    }
+  }
+}
+
+class CategorySection extends StatelessWidget {
+  final String title;
+  final List<Channel> channels;
+  final Function(Channel) onChannelTap;
+
+  const CategorySection({
+    super.key,
+    required this.title,
+    required this.channels,
+    required this.onChannelTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Category Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Colors.red, Colors.redAccent],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    title.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${channels.length}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Horizontal Channel List
+          SizedBox(
+            height: 160,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              itemCount: channels.length,
+              itemBuilder: (context, index) {
+                final channel = channels[index];
+                return HorizontalChannelTile(
+                  channel: channel,
+                  onTap: () => onChannelTap(channel),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class NewsChannelTile extends StatelessWidget {
+class HorizontalChannelTile extends StatelessWidget {
   final Channel channel;
   final VoidCallback onTap;
 
-  const NewsChannelTile({
+  const HorizontalChannelTile({
     super.key,
     required this.channel,
     required this.onTap,
@@ -147,142 +495,168 @@ class NewsChannelTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[800]!, width: 1),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          height: 80,
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Channel Logo/Icon
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(8),
+      width: 140,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[900],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey[800]!, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
-                child: channel.logo.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          channel.logo,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Icon(
-                              Icons.tv,
-                              color: Colors.white,
-                              size: 24,
-                            );
-                          },
-                        ),
-                      )
-                    : const Icon(
-                        Icons.tv,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-              ),
-              const SizedBox(width: 16),
-              // Channel Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      channel.name.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        letterSpacing: 0.5,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Channel Logo/Thumbnail
+                Container(
+                  height: 90,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Container(
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  ),
+                  child: Stack(
+                    children: [
+                      // Logo/Icon
+                      Center(
+                        child: channel.logo.isNotEmpty
+                            ? ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(12),
+                                  topRight: Radius.circular(12),
+                                ),
+                                child: Image.network(
+                                  channel.logo,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return const Center(
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.red),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(
+                                      Icons.tv,
+                                      color: Colors.red,
+                                      size: 32,
+                                    );
+                                  },
+                                ),
+                              )
+                            : const Icon(
+                                Icons.tv,
+                                color: Colors.red,
+                                size: 32,
+                              ),
+                      ),
+
+                      // Live Badge
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
+                              horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.red,
-                            borderRadius: BorderRadius.circular(3),
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
                             'LIVE',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 10,
+                              fontSize: 8,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        if (channel.group.isNotEmpty)
-                          Expanded(
-                            child: Text(
-                              channel.group,
-                              style: TextStyle(
-                                color: Colors.grey[400],
-                                fontSize: 12,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                      ),
+
+                      // Play Button Overlay
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(20),
                           ),
+                          child: const Icon(
+                            Icons.play_arrow,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Channel Info
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          channel.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        StreamBuilder(
+                          stream: Stream.periodic(const Duration(minutes: 1)),
+                          builder: (context, snapshot) {
+                            final now = DateTime.now();
+                            return Text(
+                              '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
+                              style: TextStyle(
+                                color: Colors.grey[500],
+                                fontSize: 10,
+                                fontFamily: 'monospace',
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-              // Play Button and Controls
-              Row(
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[800],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      '${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(
-                      Icons.play_arrow,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -102,14 +102,21 @@ class PlayerProvider with ChangeNotifier {
   }
 
   Future<void> setVolume(double volume) async {
-    _volume = volume;
+    final clampedVolume = volume.clamp(0.0, 100.0);
+    _volume = clampedVolume;
     try {
-      await _controller?.setVolume(volume.toInt());
+      await _controller?.setVolume(clampedVolume.round()); // VLC expects 0-100
+      _error = null;
       notifyListeners();
     } catch (e) {
       _error = 'Failed to set volume: $e';
       notifyListeners();
     }
+  }
+
+  void setVolumeSync(double volume) {
+    _volume = volume.clamp(0.0, 100.0);
+    notifyListeners();
   }
 
   Future<void> setPlaybackSpeed(double speed) async {

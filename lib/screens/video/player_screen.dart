@@ -23,7 +23,7 @@ class _PlayerScreenState extends State<PlayerScreen>
   bool _showVolumeSlider = false;
   Timer? _hideControlsTimer;
   Timer? _hideVolumeSliderTimer;
-  double _maxPosition = 1.0; // Track maximum position reached
+  double _maxPosition = 1.0;
 
   // Animation controllers
   late AnimationController _controlsAnimationController;
@@ -99,6 +99,19 @@ class _PlayerScreenState extends State<PlayerScreen>
     });
   }
 
+  void _startVolumeSliderTimer() {
+    _hideVolumeSliderTimer?.cancel();
+    _hideVolumeSliderTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted && _showVolumeSlider) {
+        setState(() => _showVolumeSlider = false);
+      }
+    });
+  }
+
+  void _cancelVolumeSliderTimer() {
+    _hideVolumeSliderTimer?.cancel();
+  }
+
   Future<void> _initializePlayer() async {
     try {
       setState(() => _isInitializing = true);
@@ -172,7 +185,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     return Stack(
       children: [
         _buildVideoPlayer(playerProvider),
-        if (_showVolumeSlider) _buildVolumeSlider(playerProvider),
+        if (_showVolumeSlider) buildVolumeSlider(playerProvider),
         AnimatedBuilder(
           animation: _controlsAnimation,
           builder: (context, child) {
@@ -183,7 +196,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         ),
         if (playerProvider.isBuffering)
           const Center(
-            child: CircularProgressIndicator(color: Colors.red),
+            child: CircularProgressIndicator(color: Colors.deepPurpleAccent),
           ),
       ],
     );
@@ -209,42 +222,48 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
   }
 
-  Widget _buildVolumeSlider(PlayerProvider playerProvider) {
+  Widget buildVolumeSlider(PlayerProvider playerProvider) {
     return Positioned(
       right: 70,
       bottom: 100,
       child: Container(
+        width: 50,
         height: 120,
-        width: 40,
         decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.7),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            RotatedBox(
-              quarterTurns: 3,
-              child: SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: Colors.red,
-                  inactiveTrackColor: Colors.grey[600],
-                  thumbColor: Colors.white,
-                  overlayColor: Colors.red.withOpacity(0.2),
-                  thumbShape:
-                      const RoundSliderThumbShape(enabledThumbRadius: 6),
-                ),
-                child: Slider(
-                  value: playerProvider.volume,
-                  min: 0,
-                  max: 100,
-                  onChanged: (value) {
-                    playerProvider.setVolume(value);
-                  },
-                ),
-              ),
+        child: SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: Colors.deepPurpleAccent,
+            inactiveTrackColor: Colors.grey[600],
+            thumbColor: Colors.deepPurpleAccent,
+            overlayColor: Colors.deepPurpleAccent.withOpacity(0.2),
+            thumbShape: const RoundSliderThumbShape(
+              enabledThumbRadius: 6,
+              disabledThumbRadius: 6,
             ),
-          ],
+            trackHeight: 6,
+            overlayShape: const RoundSliderOverlayShape(
+              overlayRadius: 20,
+            ),
+            showValueIndicator: ShowValueIndicator.always,
+          ),
+          child: RotatedBox(
+            quarterTurns: 3,
+            child: Slider(
+              value: playerProvider.volume.clamp(0.0, 100.0),
+              min: 0,
+              max: 100,
+              divisions: 100,
+              label: '${playerProvider.volume.round()}%',
+              onChanged: (value) async {
+                await playerProvider.setVolume(value);
+              },
+              onChangeStart: (_) => _cancelVolumeSliderTimer(),
+              onChangeEnd: (_) => _startVolumeSliderTimer(),
+            ),
+          ),
         ),
       ),
     );
@@ -335,7 +354,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                             playerProvider.isPlaying
                                 ? Icons.pause
                                 : Icons.play_arrow,
-                            color: Colors.blue,
+                            color: Colors.black,
                             size: 20,
                           ),
                           onPressed: () {
@@ -360,9 +379,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                       Expanded(
                         child: SliderTheme(
                           data: SliderTheme.of(context).copyWith(
-                            activeTrackColor: Colors.red,
+                            activeTrackColor: Colors.deepPurpleAccent,
                             inactiveTrackColor: Colors.grey[600],
-                            thumbColor: Colors.white,
+                            thumbColor: Colors.deepPurpleAccent,
                             overlayColor: Colors.red.withOpacity(0.2),
                             thumbShape: const RoundSliderThumbShape(
                                 enabledThumbRadius: 8),
