@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:goodchannel/screens/settings_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -13,17 +14,7 @@ class DashboardScreen extends StatelessWidget {
           Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF6A1B9A),
-                  Color(0xFF303F9F),
-                ],
-                transform: GradientRotation(3.338),
-              ),
-            ),
+            decoration: Utils.getScreenGradient(),
             child: Center(
               child: SingleChildScrollView(
                 padding:
@@ -66,7 +57,17 @@ class DashboardScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _buildBottomButton(
-                            context, Icons.settings, 'Settings', () {}),
+                          context,
+                          Icons.settings,
+                          'Settings',
+                          () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const SettingsScreen()));
+                          },
+                        ),
                         const SizedBox(width: 16),
                         _buildBottomButton(
                             context, Icons.refresh, 'Reload', () {}),
@@ -91,9 +92,10 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildFeatureButton(
-      BuildContext context, IconData icon, String label, bool isLocked) {
+      BuildContext context, IconData icon, String label, bool isLocked,
+      {VoidCallback? onTap}) {
     return GestureDetector(
-      onTap: () {}, 
+      onTap: onTap,
       // Navigator.push(
       //     context, MaterialPageRoute(builder: (context) => LiveTvScreen())),
       child: Container(

@@ -102,4 +102,27 @@ class Utils {
       ),
     );
   }
+
+  static BoxDecoration getScreenGradient() => const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF303F9F), // Indigo
+            Color(0xFF6A1B9A), // Deep Purple
+          ],
+          transform: GradientRotation(3.338),
+        ),
+      );
+
+  static SizedBox getLogo() => SizedBox(
+        width: 200,
+        height: 80,
+        child: Image.asset(
+          'assets/text_icon.png',
+          fit: BoxFit.contain,
+          height: 110,
+          width: 200,
+        ),
+      );
 }

@@ -29,16 +29,7 @@ class OtpVerificationScreen extends StatelessWidget {
         child: Stack(
           children: [
             Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF6A1B9A),
-                    Color(0xFF303F9F),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
+              decoration: Utils.getScreenGradient(),
               child: Center(
                 child: SingleChildScrollView(
                   child: Container(

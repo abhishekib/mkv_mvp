@@ -42,17 +42,7 @@ class SignUpScreenState extends State<SignUpScreen> {
           Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF6A1B9A), // Deep Purple
-                  Color(0xFF303F9F), // Indigo
-                ],
-                transform: GradientRotation(3.338), // 191.28 degrees in radians
-              ),
-            ),
+            decoration: Utils.getScreenGradient(),
             child: Center(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 30),
@@ -78,16 +68,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Logo
-                      SizedBox(
-                        width: 200,
-                        height: 80,
-                        child: Image.asset(
-                          'assets/text_icon.png',
-                          width: 200,
-                          height: 110,
-                        ),
-                      ),
+                      Utils.getLogo(),
 
                       // Title
                       Text(

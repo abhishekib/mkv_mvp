@@ -14,17 +14,7 @@ class PlanSelectionScreen extends StatelessWidget {
           Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF6A1B9A), // Deep Purple
-                  Color(0xFF303F9F), // Indigo
-                ],
-                transform: GradientRotation(3.338),
-              ),
-            ),
+            decoration: Utils.getScreenGradient(),
             child: Center(
               child: SingleChildScrollView(
                 padding:

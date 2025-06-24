@@ -36,15 +36,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             Container(
               width: double.infinity,
               height: double.infinity,
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                colors: [
-                  Color(0xFF6A1B9A), // Deep Purple
-                  Color(0xFF303F9F), // Indigo
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )),
+              decoration: Utils.getScreenGradient(),
               child: Center(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 30),
