@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:goodchannel/models/channel_model.dart';
 import 'package:goodchannel/provider/channel_provider.dart';
 import 'package:goodchannel/provider/player_provider.dart';
@@ -21,6 +22,10 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Hide system UI overlays for fullscreen
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    });
     Future.microtask(() => context.read<ChannelProvider>().fetchChannels());
   }
 
@@ -125,12 +130,15 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                   });
                 },
               )
-            : const Text(
-                'Live Channels',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+            : Center(
+                child: SizedBox(
+                  width: 200,
+                  height: 80,
+                  child: Image.asset(
+                    'assets/text_icon.png',
+                    width: 200,
+                    height: 110,
+                  ),
                 ),
               ),
         actions: [
@@ -161,7 +169,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: Colors.deepPurpleAccent,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: const Text(
@@ -188,7 +196,8 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
           if (channelProvider.isLoading && channelProvider.channels.isEmpty) {
             return const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(Colors.deepPurpleAccent),
               ),
             );
           }
@@ -200,7 +209,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                 children: [
                   const Icon(
                     Icons.error_outline,
-                    color: Colors.red,
+                    color: Colors.deepPurpleAccent,
                     size: 48,
                   ),
                   const SizedBox(height: 16),
@@ -213,7 +222,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                   ElevatedButton(
                     onPressed: _refreshChannels,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: Colors.deepPurpleAccent,
                       foregroundColor: Colors.white,
                     ),
                     child: const Text('Retry'),
@@ -255,7 +264,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                   ],
                 ),
               ),
-
+              // Filter Button for Channel
               Container(
                 height: 50,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -276,23 +285,36 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                               style: TextStyle(
                                 color: _selectedCategory == category
                                     ? Colors.white
-                                    : Colors.grey[400],
+                                    : Colors.white70,
                                 fontSize: 14,
+                                fontWeight: _selectedCategory == category
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                               ),
                             ),
                             selected: _selectedCategory == category,
-                            selectedColor: Colors.red,
-                            backgroundColor: Colors.grey[900],
+                            selectedColor: Colors.deepPurple[700],
+                            backgroundColor:
+                                Colors.deepPurple[400]?.withOpacity(0.6),
                             onSelected: (selected) {
                               setState(() {
                                 _selectedCategory = selected ? category : 'All';
                               });
                             },
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(
+                                  8), // Slightly rounded corners
+                              side: BorderSide(
+                                color: _selectedCategory == category
+                                    ? Colors.deepPurpleAccent
+                                    : Colors.transparent,
+                                width: 1.5,
+                              ),
                             ),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                             showCheckmark: false,
                           ),
                         );
@@ -332,7 +354,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                       )
                     : RefreshIndicator(
                         onRefresh: _refreshChannels,
-                        color: Colors.red,
+                        color: Colors.deepPurpleAccent,
                         backgroundColor: Colors.white,
                         child: ListView.builder(
                           controller: _scrollController,
@@ -368,7 +390,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                       curve: Curves.easeInOut,
                     );
                   },
-                  backgroundColor: Colors.red,
+                  backgroundColor: Colors.deepPurpleAccent,
                   child:
                       const Icon(Icons.keyboard_arrow_up, color: Colors.white),
                 )
@@ -418,14 +440,21 @@ class CategorySection extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.only(
+                    left: 30,
+                    right: 12,
+                    top: 6,
+                    bottom: 6,
+                  ),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Colors.red, Colors.redAccent],
+                    /* gradient: const LinearGradient(
+                      colors: [
+                        Colors.deepPurpleAccent,
+                        Colors.deepPurpleAccent
+                      ],
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                    ),
+                    ), */
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -465,7 +494,7 @@ class CategorySection extends StatelessWidget {
             height: 160,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 50),
               itemCount: channels.length,
               itemBuilder: (context, index) {
                 final channel = channels[index];
@@ -523,12 +552,13 @@ class HorizontalChannelTile extends StatelessWidget {
                   height: 90,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.deepPurpleAccent.withOpacity(0.1),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(12),
                       topRight: Radius.circular(12),
                     ),
-                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                    border: Border.all(
+                        color: Colors.deepPurpleAccent.withOpacity(0.3)),
                   ),
                   child: Stack(
                     children: [
@@ -556,7 +586,7 @@ class HorizontalChannelTile extends StatelessWidget {
                                           strokeWidth: 2,
                                           valueColor:
                                               AlwaysStoppedAnimation<Color>(
-                                                  Colors.red),
+                                                  Colors.deepPurpleAccent),
                                         ),
                                       ),
                                     );
@@ -564,7 +594,7 @@ class HorizontalChannelTile extends StatelessWidget {
                                   errorBuilder: (context, error, stackTrace) {
                                     return const Icon(
                                       Icons.tv,
-                                      color: Colors.red,
+                                      color: Colors.deepPurpleAccent,
                                       size: 32,
                                     );
                                   },
@@ -572,7 +602,7 @@ class HorizontalChannelTile extends StatelessWidget {
                               )
                             : const Icon(
                                 Icons.tv,
-                                color: Colors.red,
+                                color: Colors.deepPurpleAccent,
                                 size: 32,
                               ),
                       ),
@@ -585,7 +615,7 @@ class HorizontalChannelTile extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.red,
+                            color: Colors.deepPurpleAccent,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
