@@ -3,12 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:goodchannel/provider/channel_provider.dart';
 import 'package:goodchannel/provider/player_provider.dart';
 import 'package:goodchannel/screens/splash_screen.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,

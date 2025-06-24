@@ -20,23 +20,14 @@ class _PlayerScreenState extends State<PlayerScreen>
     with TickerProviderStateMixin {
   bool _showControls = true;
   bool _isInitializing = true;
+  bool _showVolumeSlider = false;
   Timer? _hideControlsTimer;
-  Timer? _clockTimer;
-  DateTime _currentTime = DateTime.now();
+  Timer? _hideVolumeSliderTimer;
+  double _maxPosition = 1.0; // Track maximum position reached
 
   // Animation controllers
   late AnimationController _controlsAnimationController;
-  late AnimationController _newsTickerController;
   late Animation<double> _controlsAnimation;
-
-  // News ticker texts
-  final List<String> _newsTexts = [
-    'Breaking News • Live Coverage • Stay Updated',
-    'Live Broadcast • Real-time Updates • News as it Happens',
-    'Latest News • Breaking Stories • Live from the Newsroom',
-    'Breaking • Live Updates • News Alert • Stay Informed',
-  ];
-  int _currentNewsIndex = 0;
 
   @override
   void initState() {
@@ -44,19 +35,12 @@ class _PlayerScreenState extends State<PlayerScreen>
     _initializeAnimations();
     _initializePlayer();
     _startHideControlsTimer();
-    _startClockTimer();
-    _startNewsTickerAnimation();
     _setFullScreenMode();
   }
 
   void _initializeAnimations() {
     _controlsAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-
-    _newsTickerController = AnimationController(
-      duration: const Duration(seconds: 15),
       vsync: this,
     );
 
@@ -67,6 +51,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       parent: _controlsAnimationController,
       curve: Curves.easeInOut,
     ));
+
     _controlsAnimationController.forward();
   }
 
@@ -76,29 +61,6 @@ class _PlayerScreenState extends State<PlayerScreen>
       DeviceOrientation.landscapeRight,
     ]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  }
-
-  void _startClockTimer() {
-    _clockTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          _currentTime = DateTime.now();
-        });
-      }
-    });
-  }
-
-  void _startNewsTickerAnimation() {
-    _newsTickerController.repeat();
-
-    // Change news text every 15 seconds
-    Timer.periodic(const Duration(seconds: 15), (timer) {
-      if (mounted) {
-        setState(() {
-          _currentNewsIndex = (_currentNewsIndex + 1) % _newsTexts.length;
-        });
-      }
-    });
   }
 
   void _startHideControlsTimer() {
@@ -123,6 +85,20 @@ class _PlayerScreenState extends State<PlayerScreen>
     });
   }
 
+  void _toggleVolumeSlider() {
+    setState(() {
+      _showVolumeSlider = !_showVolumeSlider;
+      if (_showVolumeSlider) {
+        _hideVolumeSliderTimer?.cancel();
+        _hideVolumeSliderTimer = Timer(const Duration(seconds: 3), () {
+          if (mounted) {
+            setState(() => _showVolumeSlider = false);
+          }
+        });
+      }
+    });
+  }
+
   Future<void> _initializePlayer() async {
     try {
       setState(() => _isInitializing = true);
@@ -137,9 +113,8 @@ class _PlayerScreenState extends State<PlayerScreen>
   @override
   void dispose() {
     _hideControlsTimer?.cancel();
-    _clockTimer?.cancel();
+    _hideVolumeSliderTimer?.cancel();
     _controlsAnimationController.dispose();
-    _newsTickerController.dispose();
     _restorePortraitOrientation();
     super.dispose();
   }
@@ -155,6 +130,10 @@ class _PlayerScreenState extends State<PlayerScreen>
           )
         : Consumer<PlayerProvider>(
             builder: (context, playerProvider, child) {
+              // Update max position for live streams
+              if (playerProvider.position.inSeconds > _maxPosition) {
+                _maxPosition = playerProvider.position.inSeconds.toDouble();
+              }
               return Scaffold(
                 backgroundColor: Colors.black,
                 body: _buildPlayerBody(playerProvider),
@@ -193,7 +172,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     return Stack(
       children: [
         _buildVideoPlayer(playerProvider),
-        _buildDynamicNewsChannelOverlay(playerProvider),
+        if (_showVolumeSlider) _buildVolumeSlider(playerProvider),
         AnimatedBuilder(
           animation: _controlsAnimation,
           builder: (context, child) {
@@ -230,119 +209,38 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
   }
 
-  Widget _buildDynamicNewsChannelOverlay(PlayerProvider playerProvider) {
+  Widget _buildVolumeSlider(PlayerProvider playerProvider) {
     return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 500),
-        height: _showControls ? 140 : 100,
+      right: 70,
+      bottom: 100,
+      child: Container(
+        height: 120,
+        width: 40,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: [
-              Colors.black.withOpacity(0.9),
-              Colors.black.withOpacity(0.7),
-              Colors.transparent,
-            ],
-          ),
+          color: Colors.black.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Spacer(),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              height: _showControls ? 50 : 30,
-              color: const Color(0xFF2a2a2a),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    // Dynamic time display
-                    AnimatedDefaultTextStyle(
-                      duration: const Duration(milliseconds: 300),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: _showControls ? 16 : 14,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'monospace',
-                      ),
-                      child: Text(
-                        '${_currentTime.hour.toString().padLeft(2, '0')}:${_currentTime.minute.toString().padLeft(2, '0')}:${_currentTime.second.toString().padLeft(2, '0')}',
-                      ),
-                    ),
-                    if (_showControls &&
-                        playerProvider.duration.inSeconds > 0) ...[
-                      const SizedBox(width: 16),
-                      Text(
-                        'Duration: ${_formatDuration(playerProvider.duration)}',
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        'Position: ${_formatDuration(playerProvider.position)}',
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                    const Spacer(),
-                    // Animated status icons
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      child: Row(
-                        children: [
-                          AnimatedScale(
-                            scale: _showControls ? 1.0 : 0.8,
-                            duration: const Duration(milliseconds: 300),
-                            child: Icon(
-                              playerProvider.isPlaying
-                                  ? Icons.volume_up
-                                  : Icons.volume_off,
-                              color: Colors.white,
-                              size: _showControls ? 18 : 14,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          AnimatedScale(
-                            scale: _showControls ? 1.0 : 0.8,
-                            duration: const Duration(milliseconds: 300),
-                            child: Icon(
-                              Icons.closed_caption,
-                              color: Colors.white,
-                              size: _showControls ? 18 : 14,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          AnimatedScale(
-                            scale: _showControls ? 1.0 : 0.8,
-                            duration: const Duration(milliseconds: 300),
-                            child: Icon(
-                              Icons.hd,
-                              color: Colors.white,
-                              size: _showControls ? 18 : 14,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          AnimatedScale(
-                            scale: _showControls ? 1.0 : 0.8,
-                            duration: const Duration(milliseconds: 300),
-                            child: Icon(
-                              Icons.fullscreen,
-                              color: Colors.white,
-                              size: _showControls ? 18 : 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+            RotatedBox(
+              quarterTurns: 3,
+              child: SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  activeTrackColor: Colors.red,
+                  inactiveTrackColor: Colors.grey[600],
+                  thumbColor: Colors.white,
+                  overlayColor: Colors.red.withOpacity(0.2),
+                  thumbShape:
+                      const RoundSliderThumbShape(enabledThumbRadius: 6),
+                ),
+                child: Slider(
+                  value: playerProvider.volume,
+                  min: 0,
+                  max: 100,
+                  onChanged: (value) {
+                    playerProvider.setVolume(value);
+                  },
                 ),
               ),
             ),
@@ -353,6 +251,8 @@ class _PlayerScreenState extends State<PlayerScreen>
   }
 
   Widget _buildControlsOverlay(PlayerProvider playerProvider) {
+    final bool isLiveStream = playerProvider.duration.inSeconds <= 0;
+
     return AnimatedBuilder(
       animation: _controlsAnimation,
       builder: (context, child) {
@@ -373,56 +273,120 @@ class _PlayerScreenState extends State<PlayerScreen>
             ),
             child: Column(
               children: [
-                // Animated top control bar
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
+                // Top control bar
+                Container(
                   height: 80,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     children: [
-                      AnimatedScale(
-                        scale: _controlsAnimation.value,
-                        duration: const Duration(milliseconds: 300),
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_back,
-                              color: Colors.white, size: 28),
-                          onPressed: () => Navigator.pop(context),
-                        ),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back,
+                            color: Colors.white, size: 28),
+                        onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: AnimatedSlide(
-                          offset: Offset(0, 1 - _controlsAnimation.value),
-                          duration: const Duration(milliseconds: 300),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                widget.channel.name,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              widget.channel.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
-                              Text(
-                                'Live Broadcast • ${widget.channel.group}',
-                                style: TextStyle(
-                                  color: Colors.grey[300],
-                                  fontSize: 14,
-                                ),
+                            ),
+                            Text(
+                              'Live Broadcast • ${widget.channel.group}',
+                              style: TextStyle(
+                                color: Colors.grey[300],
+                                fontSize: 14,
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close,
+                            color: Colors.white, size: 24),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                // Bottom controls
+                Container(
+                  height: 60,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      // Play/pause button
+                      Container(
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle, color: Colors.white),
+                        height: 35,
+                        width: 35,
+                        child: IconButton(
+                          icon: Icon(
+                            playerProvider.isPlaying
+                                ? Icons.pause
+                                : Icons.play_arrow,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            playerProvider.isPlaying
+                                ? playerProvider.pause()
+                                : playerProvider.play();
+                            _startHideControlsTimer();
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Current time
+                      Text(
+                        _formatDuration(playerProvider.position),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      // Progress bar - always show for both live and VOD
+                      Expanded(
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            activeTrackColor: Colors.red,
+                            inactiveTrackColor: Colors.grey[600],
+                            thumbColor: Colors.white,
+                            overlayColor: Colors.red.withOpacity(0.2),
+                            thumbShape: const RoundSliderThumbShape(
+                                enabledThumbRadius: 8),
+                          ),
+                          child: Slider(
+                            value: playerProvider.position.inSeconds.toDouble(),
+                            min: 0,
+                            max: isLiveStream
+                                ? (_maxPosition > 0 ? _maxPosition : 1.0)
+                                : playerProvider.duration.inSeconds.toDouble(),
+                            onChanged: isLiveStream
+                                ? null // Disable seeking for live streams
+                                : (value) {
+                                    playerProvider.seekTo(
+                                        Duration(seconds: value.toInt()));
+                                    _startHideControlsTimer();
+                                  },
                           ),
                         ),
                       ),
-                      // Animated top right controls
-                      AnimatedScale(
-                        scale: _controlsAnimation.value,
-                        duration: const Duration(milliseconds: 300),
-                        child: Container(
+                      const SizedBox(width: 8),
+                      // Duration or LIVE indicator
+                      if (isLiveStream)
+                        Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
@@ -437,65 +401,43 @@ class _PlayerScreenState extends State<PlayerScreen>
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                        )
+                      else
+                        Text(
+                          _formatDuration(playerProvider.duration),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
                         ),
+                      const SizedBox(width: 16),
+                      // Volume button
+                      IconButton(
+                        icon: Icon(
+                          playerProvider.volume > 0
+                              ? Icons.volume_up
+                              : Icons.volume_off,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        onPressed: () {
+                          _toggleVolumeSlider();
+                          _startHideControlsTimer();
+                        },
                       ),
                       const SizedBox(width: 8),
-                      AnimatedScale(
-                        scale: _controlsAnimation.value,
-                        duration: const Duration(milliseconds: 300),
-                        child: IconButton(
-                          icon: const Icon(Icons.close,
-                              color: Colors.white, size: 24),
-                          onPressed: () => Navigator.pop(context),
+                      // Fullscreen button
+                      IconButton(
+                        icon: const Icon(
+                          Icons.fullscreen,
+                          color: Colors.white,
+                          size: 24,
                         ),
+                        onPressed: () {},
                       ),
                     ],
                   ),
                 ),
-                const Spacer(),
-                // Animated center play controls
-                if (!playerProvider.isBuffering)
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    margin: const EdgeInsets.only(bottom: 160),
-                    child: AnimatedScale(
-                      scale: _controlsAnimation.value,
-                      duration: const Duration(milliseconds: 300),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildAnimatedControlButton(
-                            Icons.replay_10,
-                            () {
-                              _seekRelative(playerProvider, -10);
-                              _startHideControlsTimer();
-                            },
-                          ),
-                          const SizedBox(width: 24),
-                          _buildAnimatedControlButton(
-                            playerProvider.isPlaying
-                                ? Icons.pause
-                                : Icons.play_arrow,
-                            () {
-                              playerProvider.isPlaying
-                                  ? playerProvider.pause()
-                                  : playerProvider.play();
-                              _startHideControlsTimer();
-                            },
-                            isMain: true,
-                          ),
-                          const SizedBox(width: 24),
-                          _buildAnimatedControlButton(
-                            Icons.forward_10,
-                            () {
-                              _seekRelative(playerProvider, 10);
-                              _startHideControlsTimer();
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
@@ -504,46 +446,12 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
   }
 
-  Widget _buildAnimatedControlButton(IconData icon, VoidCallback onPressed,
-      {bool isMain = false}) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      width: isMain ? 64 : 48,
-      height: isMain ? 64 : 48,
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(isMain ? 32 : 24),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(isMain ? 32 : 24),
-          onTap: onPressed,
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: isMain ? 32 : 24,
-          ),
-        ),
-      ),
-    );
-  }
-
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
+    final hours = duration.inHours;
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return [if (duration.inHours > 0) hours, minutes, seconds].join(':');
-  }
-
-  Future<void> _seekRelative(PlayerProvider playerProvider, int seconds) async {
-    final newPosition = playerProvider.position + Duration(seconds: seconds);
-    await playerProvider.seekTo(newPosition);
+    return hours > 0 ? '$hours:$minutes:$seconds' : '$minutes:$seconds';
   }
 
   void _restorePortraitOrientation() {
