@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:goodchannel/screens/subscription_plan_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -178,6 +179,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ElevatedButton(
                         onPressed: () {
                           // Handle sign up
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => PlanSelectionScreen(),
+                          ));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFF7C3AED),
