@@ -524,7 +524,7 @@ class HorizontalChannelTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 140,
+      width: 250,
       margin: const EdgeInsets.symmetric(horizontal: 4),
       child: Material(
         color: Colors.transparent,
@@ -607,27 +607,27 @@ class HorizontalChannelTile extends StatelessWidget {
                               ),
                       ),
 
-                      // Live Badge
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.deepPurpleAccent,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'LIVE',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
+                      // // Live Badge
+                      // Positioned(
+                      //   top: 8,
+                      //   right: 8,
+                      //   child: Container(
+                      //     padding: const EdgeInsets.symmetric(
+                      //         horizontal: 6, vertical: 2),
+                      //     decoration: BoxDecoration(
+                      //       color: Colors.deepPurpleAccent,
+                      //       borderRadius: BorderRadius.circular(4),
+                      //     ),
+                      //     child: const Text(
+                      //       'LIVE',
+                      //       style: TextStyle(
+                      //         color: Colors.white,
+                      //         fontSize: 8,
+                      //         fontWeight: FontWeight.bold,
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
 
                       // Play Button Overlay
                       Center(
@@ -667,20 +667,20 @@ class HorizontalChannelTile extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        StreamBuilder(
-                          stream: Stream.periodic(const Duration(minutes: 1)),
-                          builder: (context, snapshot) {
-                            final now = DateTime.now();
-                            return Text(
-                              '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
-                              style: TextStyle(
-                                color: Colors.grey[500],
-                                fontSize: 10,
-                                fontFamily: 'monospace',
-                              ),
-                            );
-                          },
-                        ),
+                        // StreamBuilder(
+                        //   stream: Stream.periodic(const Duration(minutes: 1)),
+                        //   builder: (context, snapshot) {
+                        //     final now = DateTime.now();
+                        //     return Text(
+                        //       '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
+                        //       style: TextStyle(
+                        //         color: Colors.grey[500],
+                        //         fontSize: 10,
+                        //         fontFamily: 'monospace',
+                        //       ),
+                        //     );
+                        //   },
+                        // ),
                       ],
                     ),
                   ),
