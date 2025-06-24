@@ -117,17 +117,24 @@ class _PlayerScreenState extends State<PlayerScreen> {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: _toggleControlsVisibility,
-      child: playerProvider.controller != null
-          ? VlcPlayer(
-              controller: playerProvider.controller!,
-              aspectRatio: 16 / 9,
-              placeholder: const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
-            )
-          : const Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            ),
+      child: Center(
+        // Wrap with Center widget
+        child: AspectRatio(
+          // Add AspectRatio to maintain 16:9
+          aspectRatio: 16 / 9,
+          child: playerProvider.controller != null
+              ? VlcPlayer(
+                  controller: playerProvider.controller!,
+                  aspectRatio: 16 / 9,
+                  placeholder: const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                )
+              : const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+        ),
+      ),
     );
   }
 
