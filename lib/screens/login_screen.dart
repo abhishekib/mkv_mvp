@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:goodchannel/screens/dashboard_screen.dart';
 import 'package:goodchannel/screens/forgot_screen.dart';
 import 'package:goodchannel/screens/sign_up_screen.dart';
-import 'package:goodchannel/screens/video/channel_list_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
 
 class LoginScreen extends StatefulWidget {

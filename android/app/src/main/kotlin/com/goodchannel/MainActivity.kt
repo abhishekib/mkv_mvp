@@ -1,4 +1,4 @@
-package com.example.goodchannel
+package com.goodchannel
 
 import io.flutter.embedding.android.FlutterActivity
 
