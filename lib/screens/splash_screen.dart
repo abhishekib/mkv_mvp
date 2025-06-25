@@ -176,7 +176,7 @@ class _DottedCircularProgressPainter extends CustomPainter {
         final intensity = 1.0 - (cyclePosition * 2);
         paint.color = Color.lerp(
           Colors.white,
-          Colors.black,
+          Colors.deepPurpleAccent,
           intensity,
         )!;
       } else {
