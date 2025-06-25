@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:goodchannel/provider/channel_provider.dart';
 import 'package:goodchannel/provider/player_provider.dart';
 import 'package:goodchannel/screens/splash_screen.dart';
+import 'package:goodchannel/screens/video_splash_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +16,6 @@ void main() async {
     runApp(
       MultiProvider(
         providers: [
-
           ChangeNotifierProvider(create: (_) => ChannelProvider()),
           ChangeNotifierProvider(create: (_) => PlayerProvider()),
         ],
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const SplashScreen(),
+      home: const VideoSplashScreen(nextScreen: SplashScreen()),
       debugShowCheckedModeBanner: false,
     );
   }
