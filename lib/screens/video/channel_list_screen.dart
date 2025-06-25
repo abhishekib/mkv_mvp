@@ -39,75 +39,6 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
     await context.read<ChannelProvider>().fetchChannels();
   }
 
-  Map<String, List<Channel>> _getGroupedChannels(List<Channel> channels) {
-    var filteredChannels = channels;
-
-    // Filter by search query
-    if (_searchQuery.isNotEmpty) {
-      filteredChannels = filteredChannels
-          .where((channel) =>
-              channel.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              channel.group.toLowerCase().contains(_searchQuery.toLowerCase()))
-          .toList();
-    }
-
-    // Group channels by category
-    Map<String, List<Channel>> groupedChannels = {};
-
-    for (var channel in filteredChannels) {
-      String group = channel.group.isEmpty ? 'Other' : channel.group;
-      if (!groupedChannels.containsKey(group)) {
-        groupedChannels[group] = [];
-      }
-      groupedChannels[group]!.add(channel);
-    }
-
-    // Filter by selected category
-    if (_selectedCategory != 'All') {
-      groupedChannels = {
-        _selectedCategory: groupedChannels[_selectedCategory] ?? []
-      };
-    }
-
-    // Sort groups alphabetically, but keep "FORMULA 1 + MOTO GP" first if it exists
-    var sortedGroups = groupedChannels.keys.toList();
-    sortedGroups.sort((a, b) {
-      if (a.contains('FORMULA') || a.contains('F1')) return -1;
-      if (b.contains('FORMULA') || b.contains('F1')) return 1;
-      if (a == 'Other') return 1;
-      if (b == 'Other') return -1;
-      return a.compareTo(b);
-    });
-
-    Map<String, List<Channel>> sortedGroupedChannels = {};
-    for (String group in sortedGroups) {
-      sortedGroupedChannels[group] = groupedChannels[group]!;
-    }
-
-    return sortedGroupedChannels;
-  }
-
-  List<String> _getAllCategories(List<Channel> channels) {
-    Set<String> categories = {'All'};
-    for (var channel in channels) {
-      String group = channel.group.isEmpty ? 'Other' : channel.group;
-      categories.add(group);
-    }
-
-    var sortedCategories = categories.toList();
-    sortedCategories.sort((a, b) {
-      if (a == 'All') return -1;
-      if (b == 'All') return 1;
-      if (a.contains('FORMULA') || a.contains('F1')) return -1;
-      if (b.contains('FORMULA') || b.contains('F1')) return 1;
-      if (a == 'Other') return 1;
-      if (b == 'Other') return -1;
-      return a.compareTo(b);
-    });
-
-    return sortedCategories;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -232,7 +163,10 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
             );
           }
 
-          final groupedChannels = _getGroupedChannels(channelProvider.channels);
+          final groupedChannels = channelProvider.getGroupedChannels(
+            _searchQuery,
+            _selectedCategory,
+          );
           final totalChannels = groupedChannels.values
               .fold(0, (sum, channels) => sum + channels.length);
 
@@ -270,8 +204,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Consumer<ChannelProvider>(
                   builder: (context, channelProvider, child) {
-                    final categories =
-                        _getAllCategories(channelProvider.channels);
+                    final categories = channelProvider.getAllCategories();
                     return ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: categories.length,
@@ -380,7 +313,8 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
       ),
       floatingActionButton: Consumer<ChannelProvider>(
         builder: (context, channelProvider, child) {
-          final groupedChannels = _getGroupedChannels(channelProvider.channels);
+          final groupedChannels = channelProvider.getGroupedChannels(
+              _searchQuery, _selectedCategory);
           return groupedChannels.isNotEmpty
               ? FloatingActionButton(
                   onPressed: () {
