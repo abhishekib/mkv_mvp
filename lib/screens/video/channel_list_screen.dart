@@ -457,171 +457,133 @@ class HorizontalChannelTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 250,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[900],
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[800]!, width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 250,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(
+              4), // Slightly rounded corners for the container
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Channel Logo/Thumbnail
-                Container(
-                  height: 90,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurpleAccent.withOpacity(0.1),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12),
-                    ),
-                    border: Border.all(
-                        color: Colors.deepPurpleAccent.withOpacity(0.3)),
-                  ),
-                  child: Stack(
-                    children: [
-                      // Logo/Icon
-                      Center(
-                        child: channel.logo.isNotEmpty
-                            ? ClipRRect(
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(12),
-                                  topRight: Radius.circular(12),
-                                ),
-                                child: Image.network(
-                                  channel.logo,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.cover,
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return const Center(
-                                      child: SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.deepPurpleAccent),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(
-                                      Icons.tv,
-                                      color: Colors.deepPurpleAccent,
-                                      size: 32,
-                                    );
-                                  },
-                                ),
-                              )
-                            : const Icon(
-                                Icons.tv,
-                                color: Colors.deepPurpleAccent,
-                                size: 32,
-                              ),
-                      ),
-
-                      // // Live Badge
-                      // Positioned(
-                      //   top: 8,
-                      //   right: 8,
-                      //   child: Container(
-                      //     padding: const EdgeInsets.symmetric(
-                      //         horizontal: 6, vertical: 2),
-                      //     decoration: BoxDecoration(
-                      //       color: Colors.deepPurpleAccent,
-                      //       borderRadius: BorderRadius.circular(4),
-                      //     ),
-                      //     child: const Text(
-                      //       'LIVE',
-                      //       style: TextStyle(
-                      //         color: Colors.white,
-                      //         fontSize: 8,
-                      //         fontWeight: FontWeight.bold,
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
-
-                      // Play Button Overlay
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(20),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Channel Image (now rectangular)
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: channel.logo.isNotEmpty
+                  ? Image.network(
+                      channel.logo,
+                      fit: BoxFit.fitWidth,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.deepPurpleAccent),
                           ),
-                          child: const Icon(
-                            Icons.play_arrow,
-                            color: Colors.white,
-                            size: 24,
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[800],
+                          child: const Center(
+                            child: Icon(
+                              Icons.tv,
+                              color: Colors.deepPurpleAccent,
+                              size: 32,
+                            ),
                           ),
+                        );
+                      },
+                    )
+                  : Container(
+                      color: Colors.grey[800],
+                      child: const Center(
+                        child: Icon(
+                          Icons.tv,
+                          color: Colors.deepPurpleAccent,
+                          size: 32,
                         ),
                       ),
+                    ),
+            ),
+
+            // Gradient Overlay at bottom for text
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(4),
+                    bottomRight: Radius.circular(4),
+                  ),
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.8),
+                      Colors.transparent,
                     ],
                   ),
                 ),
-
-                // Channel Info
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          channel.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        // StreamBuilder(
-                        //   stream: Stream.periodic(const Duration(minutes: 1)),
-                        //   builder: (context, snapshot) {
-                        //     final now = DateTime.now();
-                        //     return Text(
-                        //       '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
-                        //       style: TextStyle(
-                        //         color: Colors.grey[500],
-                        //         fontSize: 10,
-                        //         fontFamily: 'monospace',
-                        //       ),
-                        //     );
-                        //   },
-                        // ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+
+            // Channel Name Text
+            Positioned(
+              bottom: 8,
+              left: 8,
+              right: 8,
+              child: Text(
+                channel.name,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 4,
+                      color: Colors.black,
+                      offset: Offset(0, 1),
+                    )
+                  ],
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+            // Play Button in center
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.play_circle_filled,
+                  color: Colors.white.withOpacity(0.8),
+                  size: 48,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
