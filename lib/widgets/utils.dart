@@ -20,7 +20,8 @@ class Utils {
           color: Colors.white.withOpacity(0.2),
         ),
       ),
-      child: TextField(
+      child: TextFormField(
+        validator: validator,
         controller: controller,
         obscureText: obscureText && isPassword,
         style: TextStyle(color: Colors.white),

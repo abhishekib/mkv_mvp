@@ -15,8 +15,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
@@ -27,16 +25,9 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   @override
-  void dispose() {
-    // Restore system UI when screen is disposed
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    _usernameController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
     return Scaffold(
       // Remove SafeArea to use full screen
       body: GestureDetector(
@@ -66,140 +57,149 @@ class LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Logo/Icon
-                    SizedBox(
-                      width: 200,
-                      height: 80,
-                      child: Image.asset(
-                        'assets/text_icon.png',
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Logo/Icon
+                      SizedBox(
                         width: 200,
-                        height: 110,
-                      ),
-                    ),
-
-                    // Welcome Text
-                    Text(
-                      'Welcome back!',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-
-                    // Username Field
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Username',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        height: 80,
+                        child: Image.asset(
+                          'assets/text_icon.png',
+                          width: 200,
+                          height: 110,
                         ),
-                        SizedBox(height: 8),
-                        Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
-                              ),
+                      ),
+
+                      // Welcome Text
+                      Text(
+                        'Welcome back!',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      // Username Field
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Username',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
                             ),
-                            child: Utils.textField(
-                              controller: _usernameController,
-                              hint: 'Enter your Username',
-                            )),
-                      ],
-                    ),
-
-                    SizedBox(height: 20),
-
-                    // Password Field
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Password',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
                           ),
-                        ),
-                        SizedBox(height: 8),
-                        Utils.textField(
-                          controller: _passwordController,
-                          hint: 'Enter your Password',
-                          keyboardType: TextInputType.visiblePassword,
-                          isPassword: true,
-                          obscureText: _obscurePassword,
-                          onToggleVisibility: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        )
-                      ],
-                    ),
-
-                    SizedBox(height: 16),
-
-                    // Forgot Password
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => ForgotPasswordScreen()),
-                          );
-                        },
-                        child: Text(
-                          'Forgot Password?',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 14,
-                          ),
-                        ),
+                          SizedBox(height: 8),
+                          Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
+                              ),
+                              child: Utils.textField(
+                                validator: (value) => value!.isEmpty
+                                    ? "Please enter your username"
+                                    : null,
+                                controller: context
+                                    .read<AuthViewModel>()
+                                    .usernameController,
+                                hint: 'Enter your Username',
+                              )),
+                        ],
                       ),
-                    ),
 
-                    SizedBox(height: 24),
+                      SizedBox(height: 20),
 
-                    // Login and Sign-up buttons
-                    Row(
-                      children: [
-                        Utils.button(
-                          text: 'Login',
-                          onPressed: () async {
-                            await context.read<AuthViewModel>().login({
-                              'username': _usernameController.text,
-                              'password': _passwordController.text
-                            });
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => DashboardScreen()));
-                          },
-                        ),
-                        SizedBox(width: 12),
-                        Utils.button(
-                          text: 'Sign Up',
+                      // Password Field
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Password',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Utils.textField(
+                            validator: (value) => value!.isEmpty
+                                ? "Please enter your password"
+                                : null,
+                            controller: context
+                                .read<AuthViewModel>()
+                                .passwordController,
+                            hint: 'Enter your Password',
+                            keyboardType: TextInputType.visiblePassword,
+                            isPassword: true,
+                            obscureText: _obscurePassword,
+                            onToggleVisibility: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          )
+                        ],
+                      ),
+
+                      SizedBox(height: 16),
+
+                      // Forgot Password
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                  builder: (context) => SignUpScreen()),
+                                  builder: (context) => ForgotPasswordScreen()),
                             );
                           },
+                          child: Text(
+                            'Forgot Password?',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+
+                      SizedBox(height: 24),
+
+                      // Login and Sign-up buttons
+                      Row(
+                        children: [
+                          Utils.button(
+                              text: 'Login',
+                              onPressed: () {
+                                _formKey.currentState?.validate();
+                                // Dismiss the keyboard
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                context.read<AuthViewModel>().login(context);
+                              }),
+                          SizedBox(width: 12),
+                          Utils.button(
+                            text: 'Sign Up',
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (context) => SignUpScreen()),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
