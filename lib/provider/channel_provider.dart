@@ -7,6 +7,13 @@ class ChannelProvider with ChangeNotifier {
   bool _isLoading = false;
   String _error = '';
   String? _lastUpdated;
+  String _searchQuery = '';
+  bool _isSearching = false;
+  String _selectedCategory = 'All';
+
+  String get searchQuery => _searchQuery;
+  bool get isSearching => _isSearching;
+  String get selectedCategory => _selectedCategory;
 
   List<Channel> get channels => _channels;
   bool get isLoading => _isLoading;
@@ -123,5 +130,20 @@ class ChannelProvider with ChangeNotifier {
     });
 
     return sortedCategories;
+  }
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  void toggleSearch(bool searching) {
+    _isSearching = searching;
+    notifyListeners();
+  }
+
+  void setSelectedCategory(String category) {
+    _selectedCategory = category;
+    notifyListeners();
   }
 }

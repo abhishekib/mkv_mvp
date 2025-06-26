@@ -15,9 +15,8 @@ class ChannelListScreen extends StatefulWidget {
 
 class _ChannelListScreenState extends State<ChannelListScreen> {
   final ScrollController _scrollController = ScrollController();
-  String _searchQuery = '';
-  bool _isSearching = false;
   String _selectedCategory = 'All';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -32,6 +31,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -46,72 +46,59 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        title: _isSearching
-            ? TextField(
-                autofocus: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  hintText: 'Search channels or categories...',
-                  hintStyle: TextStyle(color: Colors.grey),
-                  border: InputBorder.none,
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
-                },
-              )
-            : Center(
-                child: SizedBox(
-                  width: 200,
-                  height: 80,
-                  child: Image.asset(
-                    'assets/text_icon.png',
-                    width: 200,
-                    height: 110,
+        title: Consumer<ChannelProvider>(
+            builder: (context, channelProvider, child) {
+          return channelProvider.isSearching
+              ? TextField(
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    hintText: 'Search channels or categories...',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: InputBorder.none,
                   ),
-                ),
-              ),
+                  onChanged: (value) {
+                    channelProvider.setSearchQuery(value);
+                  },
+                )
+              : Center(
+                  child: SizedBox(
+                    width: 200,
+                    height: 80,
+                    child: Image.asset(
+                      'assets/text_icon.png',
+                      width: 200,
+                      height: 110,
+                    ),
+                  ),
+                );
+        }),
         actions: [
-          if (_isSearching)
-            IconButton(
-              icon: const Icon(Icons.clear, color: Colors.white),
-              onPressed: () {
-                setState(() {
-                  _isSearching = false;
-                  _searchQuery = '';
-                });
-              },
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.search, color: Colors.white),
-              onPressed: () {
-                setState(() {
-                  _isSearching = true;
-                });
-              },
-            ),
+          Consumer<ChannelProvider>(
+            builder: (context, channelProvider, child) {
+              if (channelProvider.isSearching) {
+                return IconButton(
+                  icon: const Icon(Icons.clear, color: Colors.white),
+                  onPressed: () {
+                    channelProvider.setSearchQuery('');
+                    channelProvider.toggleSearch(false);
+                    _searchController.clear();
+                  },
+                );
+              } else {
+                return IconButton(
+                  icon: const Icon(Icons.search, color: Colors.white),
+                  onPressed: () {
+                    channelProvider.toggleSearch(true);
+                  },
+                );
+              }
+            },
+          ),
           Container(
             margin: const EdgeInsets.only(right: 12),
             child: Row(
               children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurpleAccent,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Text(
-                    'LIVE',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
                 const SizedBox(width: 12),
                 IconButton(
                   icon: const Icon(Icons.refresh, color: Colors.white),
@@ -151,7 +138,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _refreshChannels,
+                    onPressed: channelProvider.fetchChannels,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurpleAccent,
                       foregroundColor: Colors.white,
@@ -164,8 +151,8 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
           }
 
           final groupedChannels = channelProvider.getGroupedChannels(
-            _searchQuery,
-            _selectedCategory,
+            channelProvider.searchQuery,
+            channelProvider.selectedCategory,
           );
           final totalChannels = groupedChannels.values
               .fold(0, (sum, channels) => sum + channels.length);
@@ -265,7 +252,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              _searchQuery.isNotEmpty
+                              channelProvider.searchQuery.isNotEmpty
                                   ? Icons.search_off
                                   : Icons.tv_off,
                               color: Colors.grey[600],
@@ -273,8 +260,8 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              _searchQuery.isNotEmpty
-                                  ? 'No channels found for "$_searchQuery"'
+                              channelProvider.searchQuery.isNotEmpty
+                                  ? 'No channels found for "${channelProvider.searchQuery}"'
                                   : 'No channels available',
                               style: TextStyle(
                                 color: Colors.grey[400],
@@ -314,7 +301,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
       floatingActionButton: Consumer<ChannelProvider>(
         builder: (context, channelProvider, child) {
           final groupedChannels = channelProvider.getGroupedChannels(
-              _searchQuery, _selectedCategory);
+              channelProvider.searchQuery, _selectedCategory);
           return groupedChannels.isNotEmpty
               ? FloatingActionButton(
                   onPressed: () {
