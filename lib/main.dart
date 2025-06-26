@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:goodchannel/provider/auth_view_model.dart';
 import 'package:goodchannel/provider/channel_provider.dart';
 import 'package:goodchannel/provider/player_provider.dart';
 import 'package:goodchannel/screens/splash_screen.dart';
@@ -16,6 +17,7 @@ void main() async {
     runApp(
       MultiProvider(
         providers: [
+          ChangeNotifierProvider(create: (_) => AuthViewModel()),
           ChangeNotifierProvider(create: (_) => ChannelProvider()),
           ChangeNotifierProvider(create: (_) => PlayerProvider()),
         ],
