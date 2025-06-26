@@ -181,10 +181,11 @@ class LoginScreenState extends State<LoginScreen> {
                           Utils.button(
                               text: 'Login',
                               onPressed: () {
-                                _formKey.currentState?.validate();
                                 // Dismiss the keyboard
                                 FocusManager.instance.primaryFocus?.unfocus();
-                                context.read<AuthViewModel>().login(context);
+                                if (_formKey.currentState!.validate()) {
+                                  context.read<AuthViewModel>().login(context);
+                                }
                               }),
                           SizedBox(width: 12),
                           Utils.button(
