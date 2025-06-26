@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:goodchannel/provider/auth_view_model.dart';
 import 'package:goodchannel/screens/dashboard_screen.dart';
 import 'package:goodchannel/screens/forgot_screen.dart';
 import 'package:goodchannel/screens/sign_up_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,7 +44,7 @@ class LoginScreenState extends State<LoginScreen> {
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration:Utils.getScreenGradient(),
+          decoration: Utils.getScreenGradient(),
           child: Center(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 30),
@@ -176,9 +178,13 @@ class LoginScreenState extends State<LoginScreen> {
                       children: [
                         Utils.button(
                           text: 'Login',
-                          onPressed: () {
+                          onPressed: () async {
+                            await context.read<AuthViewModel>().login({
+                              'username': _usernameController.text,
+                              'password': _passwordController.text
+                            });
                             Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (context) => DashboardScreen()));
+                                builder: (context) => DashboardScreen()));
                           },
                         ),
                         SizedBox(width: 12),
