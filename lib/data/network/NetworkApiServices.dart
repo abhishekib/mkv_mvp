@@ -44,6 +44,7 @@ class NetworkApiservice extends BaseApiAServices {
         Map<String, dynamic> errorJson = jsonDecode(response.body);
         String errorMessage = errorJson['message'];
         throw BadRequestException(errorMessage);
+      case 401:
       case 404:
         Map<String, dynamic> errorJson = jsonDecode(response.body);
         String errorMessage = errorJson['message'];
