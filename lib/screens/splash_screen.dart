@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:goodchannel/screens/login_screen.dart';
 import 'package:goodchannel/widgets/dotted_circular_progress.dart';

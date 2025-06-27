@@ -6,7 +6,6 @@ import 'package:goodchannel/provider/player_provider.dart';
 import 'package:goodchannel/screens/splash_screen.dart';
 import 'package:goodchannel/screens/video_splash_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

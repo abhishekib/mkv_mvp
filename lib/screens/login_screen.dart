@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:goodchannel/provider/auth_view_model.dart';
-import 'package:goodchannel/screens/dashboard_screen.dart';
 import 'package:goodchannel/screens/forgot_screen.dart';
 import 'package:goodchannel/screens/sign_up_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
