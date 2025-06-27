@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:goodchannel/provider/auth_view_model.dart';
 import 'package:goodchannel/screens/subscription_plan_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
+import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -20,22 +23,9 @@ class SignUpScreenState extends State<SignUpScreen> {
   // final List<String> _plans = ['Basic', 'Standard', 'Premium'];
 
   @override
-  void initState() {
-    super.initState();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  }
-
-  @override
-  void dispose() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    _usernameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
     return Scaffold(
       body: Stack(
         children: [
@@ -65,126 +55,136 @@ class SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ],
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Utils.getLogo(),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Utils.getLogo(),
 
-                      // Title
-                      Text(
-                        'Sign Up for Exclusive Updates!',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.5,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 32),
-
-                      // Username Field
-                      _buildTextField(
-                        label: 'Username',
-                        hint: 'Enter user name',
-                        controller: _usernameController,
-                      ),
-                      SizedBox(height: 20),
-
-                      // Email Field
-                      _buildTextField(
-                        label: 'Email',
-                        hint: 'Enter email name',
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      SizedBox(height: 20),
-
-                      // Password Field
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Password',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
-                              ),
-                            ),
-                            child: TextField(
-                              controller: _passwordController,
-                              obscureText: _obscurePassword,
-                              style: TextStyle(color: Colors.white),
-                              decoration: InputDecoration(
-                                hintText: 'Enter your password',
-                                hintStyle: TextStyle(
-                                  color: Colors.white.withOpacity(0.6),
-                                  fontSize: 14,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 16,
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscurePassword
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                    color: Colors.white.withOpacity(0.6),
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscurePassword = !_obscurePassword;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 24),
-
-                      SizedBox(height: 32),
-
-                      // Sign Up Button
-                      ElevatedButton(
-                        onPressed: () {
-                          // Handle sign up
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => PlanSelectionScreen(),
-                          ));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF7C3AED),
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          minimumSize: Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          'Choose Plan',
+                        // Title
+                        Text(
+                          'Sign Up for Exclusive Updates!',
                           style: TextStyle(
-                            fontSize: 16,
+                            color: Colors.white,
+                            fontSize: 24,
                             fontWeight: FontWeight.w600,
+                            letterSpacing: -0.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 32),
+
+                        // Username Field
+                        _buildTextField(
+                          label: 'Username',
+                          hint: 'Enter user name',
+                          controller:
+                              context.read<AuthViewModel>().usernameController,
+                        ),
+                        SizedBox(height: 20),
+
+                        // Email Field
+                        _buildTextField(
+                          label: 'Email',
+                          hint: 'Enter email name',
+                          controller:
+                              context.read<AuthViewModel>().emailController,
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        SizedBox(height: 20),
+
+                        // Password Field
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Password',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
+                              ),
+                              child: TextFormField(
+                                validator: (value) => value!.isEmpty
+                                    ? 'Please Enter your password'
+                                    : null,
+                                controller: context
+                                    .read<AuthViewModel>()
+                                    .passwordController,
+                                obscureText: _obscurePassword,
+                                style: TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                  hintText: 'Enter your password',
+                                  hintStyle: TextStyle(
+                                    color: Colors.white.withOpacity(0.6),
+                                    fontSize: 14,
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscurePassword
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color: Colors.white.withOpacity(0.6),
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscurePassword = !_obscurePassword;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 24),
+
+                      SizedBox(height: 32),
+
+                        // Sign Up Button
+                        ElevatedButton(
+                          onPressed: () {
+                            // Handle sign up
+                            if (_formKey.currentState!.validate()) {
+                              context.read<AuthViewModel>().register(context);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF7C3AED),
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            minimumSize: Size(double.infinity, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'Choose Plan',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -224,7 +224,9 @@ class SignUpScreenState extends State<SignUpScreen> {
               color: Colors.white.withOpacity(0.2),
             ),
           ),
-          child: TextField(
+          child: TextFormField(
+            validator: (value) =>
+                value!.isEmpty ? 'Please Enter your $label' : null,
             controller: controller,
             style: TextStyle(color: Colors.white),
             keyboardType: keyboardType,
