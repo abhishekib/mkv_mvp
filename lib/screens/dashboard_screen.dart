@@ -25,7 +25,7 @@ class DashboardScreen extends StatelessWidget {
                     // Logo
                     SizedBox(
                       width: 200,
-                      height: 80,
+                      height: 100,
                       child: Image.asset(
                         'assets/text_icon.png',
                         fit: BoxFit.contain,
