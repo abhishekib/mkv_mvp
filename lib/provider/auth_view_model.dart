@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:goodchannel/provider/user_view_model.dart';
 import 'package:goodchannel/repository/auth_repository.dart';
 import 'package:goodchannel/screens/dashboard_screen.dart';
 import 'package:goodchannel/screens/subscription_plan_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
+import 'package:provider/provider.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final authRepo = AuthRepository();
@@ -22,6 +24,7 @@ class AuthViewModel extends ChangeNotifier {
       Map<String, dynamic> response = await authRepo.login(data);
       Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => DashboardScreen()));
+      context.read<UserViewModel>().saveToken(response['token']);
       usernameController.clear();
       passwordController.clear();
       Utils.toastMessage(response['message']);
