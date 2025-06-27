@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:goodchannel/provider/user_view_model.dart';
+import 'package:goodchannel/screens/dashboard_screen.dart';
 import 'package:goodchannel/screens/login_screen.dart';
 import 'package:goodchannel/widgets/dotted_circular_progress.dart';
 import 'package:goodchannel/widgets/utils.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -41,10 +44,19 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animationController.forward();
 
-    Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
+    Timer(const Duration(seconds: 3), () async {
+      UserViewModel userViewModel = context.read<UserViewModel>();
+      String? token = await userViewModel.getToken();
+
+      if (token != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => DashboardScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      }
     });
   }
 
