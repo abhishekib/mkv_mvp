@@ -1,5 +1,8 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:goodchannel/firebase_options.dart';
 import 'package:goodchannel/provider/auth_view_model.dart';
 import 'package:goodchannel/provider/channel_provider.dart';
 import 'package:goodchannel/provider/player_provider.dart';
@@ -9,6 +12,14 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+  } catch (e) {
+    print("Failed to initialize Firebase: $e");
+  }
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
