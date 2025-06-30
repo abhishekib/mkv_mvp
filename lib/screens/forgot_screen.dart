@@ -102,40 +102,30 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Email',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Form(key: _formKey,
-                                child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
-                                ),
-                              ),
-                              child: Utils.textField(
-                                validator: (value) => value!.isEmpty ? "Please enter your email" : null,
-                                controller: _emailController,
-                                hint: 'Enter email here',
-                              ),
-                            )),
+                          
+                            Form(
+                                key: _formKey,
+                                child:
+                                    Utils.textField(
+                                  label: 'Email',
+                                  validator: (value) => value!.isEmpty
+                                      ? "Please enter your email"
+                                      : null,
+                                  controller: _emailController,
+                                  hint: 'Enter email here',
+                                )),
                             SizedBox(height: 32),
 
                             // Continue Button
                             ElevatedButton(
                               onPressed: () {
-                                FocusManager.instance.primaryFocus
-                                        ?.unfocus();
+                                FocusManager.instance.primaryFocus?.unfocus();
                                 // Handle continue action
-                                if(_formKey.currentState!.validate()){
-                                  context.read<AuthViewModel>().generateAndSendOtp(context, _emailController.text);  
+                                if (_formKey.currentState!.validate()) {
+                                  context
+                                      .read<AuthViewModel>()
+                                      .generateAndSendOtp(
+                                          context, _emailController.text);
                                 }
                               },
                               style: ElevatedButton.styleFrom(

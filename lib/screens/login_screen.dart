@@ -95,72 +95,42 @@ class LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           // Username Field
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Username',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.2),
-                                    ),
-                                  ),
-                                  child: Utils.textField(
-                                    validator: (value) => value!.isEmpty
-                                        ? "Please enter your username"
-                                        : null,
-                                    controller: context
-                                        .read<AuthViewModel>()
-                                        .usernameController,
-                                    hint: 'Enter your Username',
-                                  )),
-                            ],
+                          
+                          Utils.textField(
+                            label: 'Username',
+                            validator: (value) => value!.isEmpty
+                                ? "Please enter your username"
+                                : null,
+                            controller: context
+                                .read<AuthViewModel>()
+                                .usernameController,
+                            hint: 'Enter your Username',
                           ),
+
+                          //),
 
                           SizedBox(height: 20),
 
                           // Password Field
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Password',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Utils.textField(
-                                validator: (value) => value!.isEmpty
-                                    ? "Please enter your password"
-                                    : null,
-                                controller: context
-                                    .read<AuthViewModel>()
-                                    .passwordController,
-                                hint: 'Enter your Password',
-                                keyboardType: TextInputType.visiblePassword,
-                                isPassword: true,
-                                obscureText: _obscurePassword,
-                                onToggleVisibility: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
-                              )
-                            ],
+                          Utils.textField(
+                            label: "Password",
+                            validator: (value) => value!.isEmpty
+                                ? "Please enter your password"
+                                : null,
+                            controller: context
+                                .read<AuthViewModel>()
+                                .passwordController,
+                            hint: 'Enter your Password',
+                            keyboardType: TextInputType.visiblePassword,
+                            isPassword: true,
+                            obscureText: _obscurePassword,
+                            onToggleVisibility: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
                           ),
+                          
 
                           SizedBox(height: 16),
 

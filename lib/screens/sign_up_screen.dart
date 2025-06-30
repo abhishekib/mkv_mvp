@@ -95,6 +95,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                         SizedBox(height: 20),
 
                         // Password Field
+
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -115,7 +116,8 @@ class SignUpScreenState extends State<SignUpScreen> {
                                   color: Colors.white.withOpacity(0.2),
                                 ),
                               ),
-                              child: TextFormField(
+                              child: Utils.textField(
+                                hint: 'Enter your password',
                                 validator: (value) => value!.isEmpty
                                     ? 'Please Enter your password'
                                     : null,
@@ -123,39 +125,19 @@ class SignUpScreenState extends State<SignUpScreen> {
                                     .read<AuthViewModel>()
                                     .passwordController,
                                 obscureText: _obscurePassword,
-                                style: TextStyle(color: Colors.white),
-                                decoration: InputDecoration(
-                                  hintText: 'Enter your password',
-                                  hintStyle: TextStyle(
-                                    color: Colors.white.withOpacity(0.6),
-                                    fontSize: 14,
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 16,
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscurePassword
-                                          ? Icons.visibility_off
-                                          : Icons.visibility,
-                                      color: Colors.white.withOpacity(0.6),
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _obscurePassword = !_obscurePassword;
-                                      });
-                                    },
-                                  ),
-                                ),
+                                onToggleVisibility: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                                isPassword: true,
                               ),
                             ),
                           ],
                         ),
                         SizedBox(height: 24),
 
-                      SizedBox(height: 32),
+                        SizedBox(height: 32),
 
                         // Sign Up Button
                         ElevatedButton(

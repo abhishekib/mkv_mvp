@@ -77,50 +77,32 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Enter New Password',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              )),
-                          const SizedBox(height: 8),
+                       
                           Utils.textField(
-                            validator: (value) => value!.isEmpty
-                                ? 'Please Enter your Password'
-                                : null,
-                            controller: newPasswordController,
-                            hint: 'Enter your new Password here',
-                            keyboardType: TextInputType.emailAddress,
-                          ),
+                              validator: (value) {
+                                return value!.isEmpty
+                                    ? 'Please Enter your Password'
+                                    : newPasswordController.text != value
+                                        ? 'Passwords do not match'
+                                        : null;
+                              },
+                              label: 'Enter New Password',
+                              hint: 'Enter your new Password here',
+                              controller: newPasswordController),
                           const SizedBox(height: 20),
-                          Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Confirm Password',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              )),
-                          const SizedBox(height: 8),
+                          
                           Utils.textField(
-                            validator: (value) {
-                              return value!.isEmpty
-                                  ? 'Please Enter your Password'
-                                  : newPasswordController.text != value
-                                      ? 'Passwords do not match'
-                                      : null;
-                            },
-                            controller: confirmPasswordController,
-                            hint: 'Retype you Password here',
-                            keyboardType: TextInputType.emailAddress,
-                            isPassword: true,
-                          ),
+                              label: 'Confirm Password',
+                              hint: 'Retype you Password here',
+                              controller: confirmPasswordController,
+                              validator: (value) {
+                                return value!.isEmpty
+                                    ? 'Please Enter your Password'
+                                    : newPasswordController.text != value
+                                        ? 'Passwords do not match'
+                                        : null;
+                              },
+                              isPassword: true),
                           const SizedBox(height: 30),
                           SizedBox(
                             width: double.infinity,
