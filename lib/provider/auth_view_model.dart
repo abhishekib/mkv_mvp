@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:goodchannel/provider/user_view_model.dart';
 import 'package:goodchannel/repository/auth_repository.dart';
 import 'package:goodchannel/screens/dashboard_screen.dart';
+import 'package:goodchannel/screens/login_screen.dart';
 import 'package:goodchannel/screens/subscription_plan_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
 import 'package:provider/provider.dart';
@@ -59,5 +60,13 @@ class AuthViewModel extends ChangeNotifier {
       authLoader = false;
       notifyListeners();
     }
+  }
+  
+  Future<void> logout(BuildContext context) async {
+    //await authRepo.logout(context);
+
+    context.read<UserViewModel>().clearAll();
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 }

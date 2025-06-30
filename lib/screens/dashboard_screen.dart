@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:goodchannel/provider/auth_view_model.dart';
 import 'package:goodchannel/screens/settings_screen.dart';
 import 'package:goodchannel/screens/video/channel_list_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
+import 'package:provider/provider.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -81,7 +83,8 @@ class DashboardScreen extends StatelessWidget {
                         const SizedBox(width: 16),
                         _buildBottomButton(context, Icons.exit_to_app, 'Exit',
                             () {
-                          Navigator.pop(context);
+                          context.read<AuthViewModel>().logout(context);
+                          //Navigator.pop(context);
                         }),
                       ],
                     ),
@@ -90,9 +93,6 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
           ),
-
-          // Back Button
-          Utils.backButton(context),
         ],
       ),
     );
