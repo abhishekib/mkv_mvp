@@ -3,6 +3,8 @@ import 'package:goodchannel/provider/user_view_model.dart';
 import 'package:goodchannel/repository/auth_repository.dart';
 import 'package:goodchannel/screens/dashboard_screen.dart';
 import 'package:goodchannel/screens/login_screen.dart';
+import 'package:goodchannel/screens/new_password_screen.dart';
+import 'package:goodchannel/screens/otp_screen.dart';
 import 'package:goodchannel/screens/subscription_plan_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
 import 'package:provider/provider.dart';
@@ -68,5 +70,63 @@ class AuthViewModel extends ChangeNotifier {
     context.read<UserViewModel>().clearAll();
     Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => LoginScreen()));
+  }
+
+  Future<void> generateAndSendOtp(BuildContext context, String email) async {
+    try {
+      Map<String, String> data = {'email': email};
+      authLoader = true;
+      notifyListeners();
+      Map<String, dynamic> response = await authRepo.generateAndSendOtp(data);
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => OtpVerificationScreen(email: email),
+        ),
+      );
+      Utils.toastMessage(response['message']);
+    } catch (e) {
+      Utils.toastMessage(e.toString());
+    }
+    finally{
+      authLoader = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> verifyOtp(BuildContext context, String email ,String otp) async {
+    try {
+      Map<String, String> data = {'email': email,'otp': otp};
+      authLoader = true;
+      notifyListeners();
+      Map<String, dynamic> response = await authRepo.verifyOtp(data);
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => NewPasswordScreen(email: email,)));
+      Utils.toastMessage(response['message']);
+    } catch (e) {
+      Utils.toastMessage(e.toString());
+    }
+    finally{
+      authLoader = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updatePassword(BuildContext context, String email ,String password) async {
+    try{
+      Map<String, String> data = {'email': email,'newPassword': password};
+      authLoader = true;
+      notifyListeners();
+      Map<String, dynamic> response = await authRepo.updatePassword(data);
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginScreen()));
+      Utils.toastMessage(response['message']);
+    }
+    catch (e){
+      Utils.toastMessage(e.toString());
+    }
+    finally{
+      authLoader = false;
+      notifyListeners();
+    }
   }
 }

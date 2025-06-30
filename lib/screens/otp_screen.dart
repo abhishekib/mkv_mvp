@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:goodchannel/provider/auth_view_model.dart';
 import 'package:goodchannel/screens/new_password_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
 import 'package:pinput/pinput.dart';
+import 'package:provider/provider.dart';
 
 class OtpVerificationScreen extends StatelessWidget {
-  OtpVerificationScreen({super.key});
+  OtpVerificationScreen({super.key, required this.email});
 
+  final String email;
   final TextEditingController otpController = TextEditingController();
 
   @override
@@ -104,12 +107,7 @@ class OtpVerificationScreen extends StatelessWidget {
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () {
-                              debugPrint("Entered OTP: ${otpController.text}");
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                  builder: (context) => NewPasswordScreen(),
-                                ),
-                              );
+                              context.read<AuthViewModel>().verifyOtp(context, email  ,otpController.text);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF7C3AED),

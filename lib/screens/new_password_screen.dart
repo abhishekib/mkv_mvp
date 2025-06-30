@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:goodchannel/provider/auth_view_model.dart';
 import 'package:goodchannel/screens/login_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
+import 'package:provider/provider.dart';
 
 class NewPasswordScreen extends StatefulWidget {
-  const NewPasswordScreen({super.key});
+  const NewPasswordScreen({super.key, required this.email});
+
+  final String email;
 
   @override
   State<NewPasswordScreen> createState() => _NewPasswordScreenState();
@@ -19,6 +23,8 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    GlobalKey<FormState> _formkey = GlobalKey<FormState>();
+
     return Scaffold(
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -48,92 +54,102 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                         ),
                       ],
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          width: 100,
-                          height: 50,
-                          child: Image.asset(
-                            'assets/text_icon.png',
-                            width: 200,
-                            height: 100,
+                    child: Form(
+                      key: _formkey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 100,
+                            height: 50,
+                            child: Image.asset(
+                              'assets/text_icon.png',
+                              width: 200,
+                              height: 100,
+                            ),
                           ),
-                        ),
-                        const Text(
-                          "New Password",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
+                          const Text(
+                            "New Password",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Enter New Password',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            )),
-                        const SizedBox(height: 8),
-                        Utils.textField(
-                          controller: newPasswordController,
-                          hint: 'Enter your new Password here',
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                        const SizedBox(height: 20),
-                        Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Confirm Password',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            )),
-                        const SizedBox(height: 8),
-                        Utils.textField(
-                          controller: confirmPasswordController,
-                          hint: 'Retype you Password here',
-                          keyboardType: TextInputType.emailAddress,
-                          isPassword: true,
-                        ),
-                        const SizedBox(height: 30),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Handle password update logic here
-                              debugPrint(
-                                  "New Password: ${newPasswordController.text}");
-                              debugPrint(
-                                  "Confirm Password: ${confirmPasswordController.text}");
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                  builder: (context) => LoginScreen(),
+                          const SizedBox(height: 24),
+                          Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Enter New Password',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                              );
+                              )),
+                          const SizedBox(height: 8),
+                          Utils.textField(
+                            validator: (value) => value!.isEmpty
+                                ? 'Please Enter your Password'
+                                : null,
+                            controller: newPasswordController,
+                            hint: 'Enter your new Password here',
+                            keyboardType: TextInputType.emailAddress,
+                          ),
+                          const SizedBox(height: 20),
+                          Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Confirm Password',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              )),
+                          const SizedBox(height: 8),
+                          Utils.textField(
+                            validator: (value) {
+                              return value!.isEmpty
+                                  ? 'Please Enter your Password'
+                                  : newPasswordController.text != value
+                                      ? 'Passwords do not match'
+                                      : null;
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF7C3AED),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                            controller: confirmPasswordController,
+                            hint: 'Retype you Password here',
+                            keyboardType: TextInputType.emailAddress,
+                            isPassword: true,
+                          ),
+                          const SizedBox(height: 30),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (_formkey.currentState!.validate()) {
+                                  context.read<AuthViewModel>().updatePassword(
+                                      context,
+                                      widget.email,
+                                      confirmPasswordController.text);
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF7C3AED),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
                               ),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            child: const Text(
-                              "Update Password",
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.white),
+                              child: const Text(
+                                "Update Password",
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

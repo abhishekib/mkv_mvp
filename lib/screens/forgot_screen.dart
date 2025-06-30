@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:goodchannel/provider/auth_view_model.dart';
 import 'package:goodchannel/screens/otp_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
+import 'package:provider/provider.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -28,6 +30,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    GlobalKey<FormState> _formKey = GlobalKey<FormState>();
     return Scaffold(
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -108,7 +111,8 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               ),
                             ),
                             SizedBox(height: 8),
-                            Container(
+                            Form(key: _formKey,
+                                child: Container(
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
@@ -117,41 +121,42 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 ),
                               ),
                               child: Utils.textField(
+                                validator: (value) => value!.isEmpty ? "Please enter your email" : null,
                                 controller: _emailController,
                                 hint: 'Enter email here',
                               ),
+                            )),
+                            SizedBox(height: 32),
+
+                            // Continue Button
+                            ElevatedButton(
+                              onPressed: () {
+                                FocusManager.instance.primaryFocus
+                                        ?.unfocus();
+                                // Handle continue action
+                                if(_formKey.currentState!.validate()){
+                                  context.read<AuthViewModel>().generateAndSendOtp(context, _emailController.text);  
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF7C3AED),
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                minimumSize: Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                'Continue',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ],
-                        ),
-                        SizedBox(height: 32),
-
-                        // Continue Button
-                        ElevatedButton(
-                          onPressed: () {
-                            // Handle continue action
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => OtpVerificationScreen(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF7C3AED),
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            minimumSize: Size(double.infinity, 50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            'Continue',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                         ),
                       ],
                     ),
