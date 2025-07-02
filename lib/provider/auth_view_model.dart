@@ -48,14 +48,16 @@ class AuthViewModel extends ChangeNotifier {
       };
       authLoader = true;
       notifyListeners();
-      Map<String, dynamic> response = await authRepo.register(data);
+      Map<String, dynamic> registerResponse = await authRepo.register(data);
+      Map<String, dynamic> loginResponse = await authRepo.login(data);
       Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => PlanSelectionScreen(),
       ));
+      context.read<UserViewModel>().saveToken(loginResponse['token']);
       emailController.clear();
       passwordController.clear();
       usernameController.clear();
-      Utils.toastMessage(response['message']);
+      Utils.toastMessage(registerResponse['message']);
     } catch (e) {
       Utils.toastMessage(e.toString());
     } finally {
