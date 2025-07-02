@@ -65,7 +65,7 @@ class OtpVerificationScreen extends StatelessWidget {
                           width: 200,
                         ),
                         const Text(
-                          "Please Enter the OTP here",
+                          "Please enter the OTP here",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 22,

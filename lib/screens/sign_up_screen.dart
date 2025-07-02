@@ -86,7 +86,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                                 .read<AuthViewModel>()
                                 .usernameController,
                             validator: (value) => value!.isEmpty
-                                ? 'Please Enter your username'
+                                ? 'Please enter your username'
                                 : null,
                           ),
                           SizedBox(height: 20),
@@ -98,10 +98,10 @@ class SignUpScreenState extends State<SignUpScreen> {
                             controller:
                                 context.read<AuthViewModel>().emailController,
                             validator: (value) => value!.isEmpty
-                                ? 'Please Enter your email'
+                                ? 'Please enter your email'
                                 : EmailValidator.validate(value)
                                     ? null
-                                    : 'Please Enter a valid email',
+                                    : 'Please enter a valid email',
                             keyboardType: TextInputType.emailAddress,
                           ),
                           SizedBox(height: 20),
@@ -111,7 +111,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                             label: 'Password',
                             hint: 'Enter your password',
                             validator: (value) => value!.isEmpty
-                                ? 'Please Enter your password'
+                                ? 'Please enter your password'
                                 : null,
                             controller: context
                                 .read<AuthViewModel>()
