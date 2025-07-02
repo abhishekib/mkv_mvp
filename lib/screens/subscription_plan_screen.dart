@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:goodchannel/screens/dashboard_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
@@ -15,147 +17,208 @@ class PlanSelectionScreen extends StatelessWidget {
             width: double.infinity,
             height: double.infinity,
             decoration: Utils.getScreenGradient(),
-            child: Center(
-              child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24.0, vertical: 30),
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  padding: const EdgeInsets.only(
-                      left: 32.0, right: 32.0, bottom: 32.0),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(24.0),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
-                      width: 1,
+            child: SingleChildScrollView(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 30),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  //const SizedBox(height: 16),
+                  Utils.getLogo(),
+                  // Title
+                  const Text(
+                    "Choose the plan that's right for you",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.5,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Logo
-                      SizedBox(
-                        width: 200,
-                        height: 80,
-                        child: Image.asset(
-                          'assets/text_icon.png',
-                          width: 200,
-                          height: 110,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+                  const SizedBox(height: 8),
 
-                      // Title
-                      const Text(
-                        "Choose the plan that's right for you",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.5,
-                        ),
+                  // Subtitle
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Text(
+                      "Choose Your Monthly Plan Three simple options. One powerful app. All plans include full access, regular updates, and friendly support. Just pick the number of users that suits you.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
                       ),
-                      const SizedBox(height: 16),
-
-                      // Subtitle
-                      const Text(
-                        "Join StreamVibe and select from our flexible subscription options tailored to suit your viewing preferences. Get ready for non-stop entertainment!",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-
-                      // Plan Card
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Monthly Plan',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Access to a wider selection of movies and shows, including most new releases and exclusive content.',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              '€7.99 /month',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  // Handle plan selection
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (context) => DashboardScreen()));
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF7C3AED),
-                                  foregroundColor: Colors.white,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  elevation: 0,
-                                ),
-                                child: const Text(
-                                  'Choose Plan',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 10),
+
+                  // Free Trial Notice
+                  const Text(
+                    "16 Day Free Trial",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Plan Cards Row
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(width: 16),
+                        _buildPlanCard(
+                          title: "Solo",
+                          subtitle:
+                              "Perfect for individuals. One account for personal use, offering full access from a single device.",
+                          price: "€8.50",
+                          deviceInfo: "1 Device",
+                          context: context,
+                        ),
+                        const SizedBox(width: 24),
+                        _buildPlanCard(
+                          title: "Duo",
+                          subtitle:
+                              "Great for two people. Access the app on two separate devices under one plan.\n",
+                          price: "€13.50",
+                          deviceInfo: "2 Devices",
+                          context: context,
+                        ),
+                        const SizedBox(width: 24),
+                        _buildPlanCard(
+                          title: "Trio",
+                          subtitle:
+                              "Ideal for families or shared households. Use the app on up to three devices at the same time.",
+                          price: "€19.00",
+                          deviceInfo: "3 Devices",
+                          context: context,
+                        ),
+                        const SizedBox(width: 16),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
 
           // Back Button
           Utils.backButton(context),
+
+          // Skip button (top-right)
+          Positioned(
+              top: MediaQuery.of(context).padding.top + 30,
+              right: 24,
+              child: TextButton(
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DashboardScreen(),
+                      ),
+                      (Route<dynamic> route) =>
+                          false, // This removes all routes,
+                    );
+                  },
+                  child: const Text(
+                    'Skip',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  )))
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlanCard({
+    required String title,
+    required String subtitle,
+    required String price,
+    required String deviceInfo,
+    required BuildContext context,
+  }) {
+    return Container(
+      width: 240,
+      height: 375,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                deviceInfo,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            subtitle,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            "$price /month",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                log("Tapped on choose plan");
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF7C3AED),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Choose Plan',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
