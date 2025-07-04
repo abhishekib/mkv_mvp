@@ -82,7 +82,7 @@ class PlanSelectionScreen extends StatelessWidget {
                         _buildPlanCard(
                           title: "Duo",
                           subtitle:
-                              "Great for two people. Access the app on two separate devices under one plan.\n",
+                              "Great for two people. Access the app on two separate devices under one plan.",
                           price: "€13.50",
                           deviceInfo: "2 Devices",
                           context: context,
@@ -144,7 +144,7 @@ class PlanSelectionScreen extends StatelessWidget {
   }) {
     return Container(
       width: 240,
-      height: 375,
+      height: 300,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.3),
