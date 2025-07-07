@@ -67,11 +67,17 @@ class AuthViewModel extends ChangeNotifier {
   }
   
   Future<void> logout(BuildContext context) async {
-    //await authRepo.logout(context);
-
-    context.read<UserViewModel>().clearAll();
-    Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => LoginScreen()));
+    try {
+      final mobileDeviceIdentifier = await _getDeviceId();
+      Map<String, dynamic> data = {'deviceId': mobileDeviceIdentifier};
+      Map<String, dynamic> response = await authRepo.logout(data);
+      context.read<UserViewModel>().clearAll();
+      Utils.toastMessage(response['message']);
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginScreen()));
+    } catch (e) {
+      Utils.toastMessage(e.toString());
+    }
   }
 
   Future<void> generateAndSendOtp(BuildContext context, String email) async {

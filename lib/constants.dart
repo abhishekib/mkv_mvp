@@ -3,6 +3,7 @@ class Constants {
 
   static const String registerEndpoint = '$baseUrl/api/register';
   static const String loginEndpoint = '$baseUrl/api/login';
+  static const String logoutEndpoint = '$baseUrl/api/logout';
 
   static const String generateAndSendOtpEndpoint = '$baseUrl/api/generate-and-send-otp';
   static const String verifyOtpEndpoint = '$baseUrl/api/verify-otp';

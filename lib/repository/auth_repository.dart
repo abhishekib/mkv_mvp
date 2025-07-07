@@ -44,4 +44,12 @@ class AuthRepository {
       rethrow;
     }
   }
+
+  Future<Map<String, dynamic>> logout(Map<String, dynamic> data) async {
+    try {
+      return await apiServices.getPostApiResponse(Constants.logoutEndpoint, data);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
