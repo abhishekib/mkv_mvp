@@ -23,15 +23,16 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<void> login(BuildContext context) async {
+    if(authLoader) return;
     try {
+      authLoader = true;
+      notifyListeners();
       final mobileDeviceIdentifier = await _getDeviceId();
       Map<String, String> data = {
         'email': emailController.text,
         'password': passwordController.text,
         'deviceId': mobileDeviceIdentifier,
       };
-      authLoader = true;
-      notifyListeners();
       Map<String, dynamic> response = await authRepo.login(data);
       Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => DashboardScreen()));
@@ -48,6 +49,7 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<void> register(BuildContext context) async {
+    if(authLoader) return;
     try {
       Map<String, String> data = {
         'username': usernameController.text,
@@ -75,6 +77,7 @@ class AuthViewModel extends ChangeNotifier {
   }
   
   Future<void> logout(BuildContext context) async {
+    if(authLoader) return;
     try {
       final mobileDeviceIdentifier = await _getDeviceId();
       Map<String, dynamic> data = {'deviceId': mobileDeviceIdentifier};
@@ -89,6 +92,7 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<void> generateAndSendOtp(BuildContext context, String email) async {
+    if(authLoader) return;
     try {
       Map<String, String> data = {'email': email};
       authLoader = true;
@@ -109,7 +113,8 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> verifyOtp(BuildContext context, String email ,String otp) async {
+  Future<void> verifyOtp(BuildContext context, String email, String otp) async {
+    if(authLoader) return;
     try {
       Map<String, String> data = {'email': email,'otp': otp};
       authLoader = true;
@@ -127,9 +132,11 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> updatePassword(BuildContext context, String email ,String password) async {
-    try{
-      Map<String, String> data = {'email': email,'newPassword': password};
+  Future<void> updatePassword(
+      BuildContext context, String email, String password) async {
+        if(authLoader) return;
+    try {
+      Map<String, String> data = {'email': email, 'newPassword': password};
       authLoader = true;
       notifyListeners();
       Map<String, dynamic> response = await authRepo.updatePassword(data);
