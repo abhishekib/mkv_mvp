@@ -59,16 +59,6 @@ class LoginScreenState extends State<LoginScreen> {
                 ),
                 child: Stack(
                   children: [
-                    Selector<AuthViewModel, bool>(
-                      selector: (context, viewModel) => viewModel.authLoader,
-                      builder: (context, authLoader, child) {
-                        return authLoader
-                            ? CircularProgressIndicator(
-                                color: Colors.white,
-                              )
-                            : Container();
-                      },
-                    ),
                     Form(
                       key: _formKey,
                       child: Column(
@@ -187,6 +177,24 @@ class LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
+                    ),
+                    Selector<AuthViewModel, bool>(
+                      selector: (context, viewModel) => viewModel.authLoader,
+                      builder: (context, authLoader, child) {
+                        return authLoader
+                            ? Positioned(
+                                left: 50,
+                                right: 50,
+                                top: 300,
+                                bottom: 50,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              )
+                            : Container();
+                      },
                     ),
                   ],
                 ),

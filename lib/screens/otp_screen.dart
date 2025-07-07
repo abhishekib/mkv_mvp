@@ -103,6 +103,26 @@ class OtpVerificationScreen extends StatelessWidget {
                         ),
 
                         const SizedBox(height: 24),
+
+                        Selector<AuthViewModel, bool>(
+                          selector: (context, viewModel) =>
+                              viewModel.authLoader,
+                          builder: (context, authLoader, child) {
+                            return authLoader
+                                ? Column(
+                                    children: [
+                                      Center(
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(height: 16)
+                                    ],
+                                  )
+                                : Container();
+                          },
+                        ),
+
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(

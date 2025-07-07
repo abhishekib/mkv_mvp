@@ -162,6 +162,23 @@ class SignUpScreenState extends State<SignUpScreen> {
             ),
           ),
 
+          Selector<AuthViewModel, bool>(
+            selector: (context, viewModel) => viewModel.authLoader,
+            builder: (context, authLoader, child) {
+              return authLoader
+                  ? Positioned(
+                      right: 200,
+                      top: 100,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : Container();
+            },
+          ),
+
           // Back Button
           Utils.backButton(context),
         ],

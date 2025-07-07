@@ -138,6 +138,24 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
               ),
             ),
             Utils.backButton(context),
+            Selector<AuthViewModel, bool>(
+                      selector: (context, viewModel) => viewModel.authLoader,
+                      builder: (context, authLoader, child) {
+                        return authLoader
+                            ? Positioned(
+                                left: 50,
+                                right: 50,
+                                top: 300,
+                                bottom: 50,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              )
+                            : Container();
+                      },
+                    ),
           ],
         ),
       ),
