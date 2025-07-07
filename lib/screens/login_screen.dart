@@ -100,7 +100,7 @@ class LoginScreenState extends State<LoginScreen> {
                           Utils.textField(
                             label: 'Email',
                             validator: (value) => value!.isEmpty
-                                ? "Please enter your email"
+                                ? "Please enter email address"
                                 : EmailValidator.validate(value) ? null : "Please enter a valid email address", // Add email validation here if needednull,
                             controller: context
                                 .read<AuthViewModel>()

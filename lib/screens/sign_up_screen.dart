@@ -98,10 +98,10 @@ class SignUpScreenState extends State<SignUpScreen> {
                             controller:
                                 context.read<AuthViewModel>().emailController,
                             validator: (value) => value!.isEmpty
-                                ? 'Please enter your email'
+                                ? 'Please enter email address'
                                 : EmailValidator.validate(value)
                                     ? null
-                                    : 'Please enter a valid email',
+                                    : 'Please enter a valid email address',
                             keyboardType: TextInputType.emailAddress,
                           ),
                           SizedBox(height: 20),

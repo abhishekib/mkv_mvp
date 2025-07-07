@@ -109,7 +109,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     Utils.textField(
                                   label: 'Email',
                                   validator: (value) => value!.isEmpty
-                                      ? "Please enter your email"
+                                      ? "Please enter email address"
                                       : null,
                                   controller: _emailController,
                                   hint: 'Enter email here',
