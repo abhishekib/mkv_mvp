@@ -7,7 +7,6 @@ import 'package:goodchannel/provider/auth_view_model.dart';
 import 'package:goodchannel/provider/channel_provider.dart';
 import 'package:goodchannel/provider/player_provider.dart';
 import 'package:goodchannel/provider/user_view_model.dart';
-import 'package:goodchannel/provider/user_view_model.dart';
 import 'package:goodchannel/screens/splash_screen.dart';
 import 'package:goodchannel/screens/video_splash_screen.dart';
 import 'package:provider/provider.dart';

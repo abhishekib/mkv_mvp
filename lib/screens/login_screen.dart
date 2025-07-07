@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:goodchannel/provider/auth_view_model.dart';
@@ -97,14 +98,14 @@ class LoginScreenState extends State<LoginScreen> {
                           // Username Field
                           
                           Utils.textField(
-                            label: 'Username',
+                            label: 'Email',
                             validator: (value) => value!.isEmpty
-                                ? "Please enter your username"
-                                : null,
+                                ? "Please enter your email"
+                                : EmailValidator.validate(value) ? null : "Please enter a valid email address", // Add email validation here if needednull,
                             controller: context
                                 .read<AuthViewModel>()
-                                .usernameController,
-                            hint: 'Enter your Username',
+                                .emailController,
+                            hint: 'Enter your Email',
                           ),
 
                           //),

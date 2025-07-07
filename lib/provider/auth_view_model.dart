@@ -7,6 +7,7 @@ import 'package:goodchannel/screens/new_password_screen.dart';
 import 'package:goodchannel/screens/otp_screen.dart';
 import 'package:goodchannel/screens/subscription_plan_screen.dart';
 import 'package:goodchannel/widgets/utils.dart';
+import 'package:mobile_device_identifier/mobile_device_identifier.dart';
 import 'package:provider/provider.dart';
 
 class AuthViewModel extends ChangeNotifier {
@@ -16,18 +17,25 @@ class AuthViewModel extends ChangeNotifier {
   final TextEditingController emailController = TextEditingController();
   bool authLoader = false;
 
+  Future<String> _getDeviceId() async {
+    final mobileDeviceIdentifier = await MobileDeviceIdentifier().getDeviceId();
+    return mobileDeviceIdentifier ?? '';
+  }
+
   Future<void> login(BuildContext context) async {
     try {
+      final mobileDeviceIdentifier = await _getDeviceId();
       Map<String, String> data = {
-        'username': usernameController.text,
-        'password': passwordController.text
+        'email': emailController.text,
+        'password': passwordController.text,
+        'deviceId': mobileDeviceIdentifier,
       };
       authLoader = true;
       notifyListeners();
       Map<String, dynamic> response = await authRepo.login(data);
       Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => DashboardScreen()));
-      context.read<UserViewModel>().saveToken(response['token']);
+      context.read<UserViewModel>().saveToken(response['data']['token']);
       usernameController.clear();
       passwordController.clear();
       Utils.toastMessage(response['message']);

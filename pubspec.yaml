@@ -52,6 +52,7 @@ dependencies:
   firebase_analytics: 11.0.0
   shared_preferences: ^2.5.3
   email_validator: ^3.0.0
+  mobile_device_identifier: ^0.0.3
 
 dev_dependencies:
   flutter_test:
