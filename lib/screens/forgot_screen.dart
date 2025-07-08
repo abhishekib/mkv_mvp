@@ -66,15 +66,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Logo
-                        SizedBox(
-                          width: 200,
-                          height: 80,
-                          child: Image.asset(
-                            'assets/text_icon.png',
-                            width: 200,
-                            height: 110,
-                          ),
-                        ),
+                        Utils.getLogo(),
 
                         // Title
                         Text(
@@ -102,11 +94,9 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                          
                             Form(
                                 key: _formKey,
-                                child:
-                                    Utils.textField(
+                                child: Utils.textField(
                                   label: 'Email',
                                   validator: (value) => value!.isEmpty
                                       ? "Please enter email address"

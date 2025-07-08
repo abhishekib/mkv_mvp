@@ -59,11 +59,7 @@ class OtpVerificationScreen extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Image(
-                          image: AssetImage('assets/text_icon.png'),
-                          height: 70,
-                          width: 200,
-                        ),
+                        Utils.getLogo(),
                         const Text(
                           "Please enter the OTP here",
                           style: TextStyle(
@@ -127,7 +123,8 @@ class OtpVerificationScreen extends StatelessWidget {
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () {
-                              context.read<AuthViewModel>().verifyOtp(context, email  ,otpController.text);
+                              context.read<AuthViewModel>().verifyOtp(
+                                  context, email, otpController.text);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF7C3AED),

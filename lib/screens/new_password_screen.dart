@@ -59,15 +59,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          SizedBox(
-                            width: 100,
-                            height: 50,
-                            child: Image.asset(
-                              'assets/text_icon.png',
-                              width: 200,
-                              height: 100,
-                            ),
-                          ),
+                          Utils.getLogo(),
                           const Text(
                             "New Password",
                             style: TextStyle(
@@ -77,7 +69,6 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                       
                           Utils.textField(
                               validator: (value) {
                                 return value!.isEmpty
@@ -90,7 +81,6 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                               hint: 'Enter your new Password here',
                               controller: newPasswordController),
                           const SizedBox(height: 20),
-                          
                           Utils.textField(
                               label: 'Confirm Password',
                               hint: 'Retype you Password here',
@@ -139,23 +129,23 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
             ),
             Utils.backButton(context),
             Selector<AuthViewModel, bool>(
-                      selector: (context, viewModel) => viewModel.authLoader,
-                      builder: (context, authLoader, child) {
-                        return authLoader
-                            ? Positioned(
-                                left: 50,
-                                right: 50,
-                                top: 300,
-                                bottom: 50,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              )
-                            : Container();
-                      },
-                    ),
+              selector: (context, viewModel) => viewModel.authLoader,
+              builder: (context, authLoader, child) {
+                return authLoader
+                    ? Positioned(
+                        left: 50,
+                        right: 50,
+                        top: 300,
+                        bottom: 50,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                        ),
+                      )
+                    : Container();
+              },
+            ),
           ],
         ),
       ),

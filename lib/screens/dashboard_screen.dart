@@ -25,14 +25,7 @@ class DashboardScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     // Logo
-                    SizedBox(
-                      width: 200,
-                      height: 100,
-                      child: Image.asset(
-                        'assets/text_icon.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                    Utils.getLogo(),
                     const SizedBox(height: 40),
 
                     // Feature Grid
@@ -77,9 +70,6 @@ class DashboardScreen extends StatelessWidget {
                                         const SettingsScreen()));
                           },
                         ),
-                        const SizedBox(width: 16),
-                        _buildBottomButton(
-                            context, Icons.refresh, 'Reload', () {}),
                         const SizedBox(width: 16),
                         _buildBottomButton(context, Icons.exit_to_app, 'Exit',
                             () {

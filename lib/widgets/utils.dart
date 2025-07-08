@@ -134,8 +134,8 @@ class Utils {
       );
 
   static SizedBox getLogo() => SizedBox(
-        width: 200,
-        height: 80,
+        width: 300,
+        height: 120,
         child: Image.asset(
           'assets/text_icon.png',
           fit: BoxFit.contain,

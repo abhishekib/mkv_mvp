@@ -65,15 +65,7 @@ class LoginScreenState extends State<LoginScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // Logo/Icon
-                          SizedBox(
-                            width: 200,
-                            height: 80,
-                            child: Image.asset(
-                              'assets/text_icon.png',
-                              width: 200,
-                              height: 110,
-                            ),
-                          ),
+                          Utils.getLogo(),
 
                           // Welcome Text
                           Text(
@@ -86,15 +78,16 @@ class LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           // Username Field
-                          
+
                           Utils.textField(
                             label: 'Email',
                             validator: (value) => value!.isEmpty
                                 ? "Please enter email address"
-                                : EmailValidator.validate(value) ? null : "Please enter a valid email address", // Add email validation here if needednull,
-                            controller: context
-                                .read<AuthViewModel>()
-                                .emailController,
+                                : EmailValidator.validate(value)
+                                    ? null
+                                    : "Please enter a valid email address", // Add email validation here if needednull,
+                            controller:
+                                context.read<AuthViewModel>().emailController,
                             hint: 'Enter your Email',
                           ),
 
@@ -121,7 +114,6 @@ class LoginScreenState extends State<LoginScreen> {
                               });
                             },
                           ),
-                          
 
                           SizedBox(height: 16),
 
