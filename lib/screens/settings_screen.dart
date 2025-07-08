@@ -25,9 +25,7 @@ class SettingsScreen extends StatelessWidget {
                       runSpacing: 20,
                       alignment: WrapAlignment.center,
                       children: [
-                        _buildOptionCard(Icons.receipt_long, 'EPG'),
                         _buildOptionCard(Icons.star_rate, 'Rate Us'),
-                        _buildOptionCard(Icons.access_time, 'Time Format'),
                         _buildOptionCard(Icons.subscriptions, 'Subscription'),
                       ],
                     ),
