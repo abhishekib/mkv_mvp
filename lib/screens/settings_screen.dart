@@ -27,6 +27,7 @@ class SettingsScreen extends StatelessWidget {
                       children: [
                         _buildOptionCard(Icons.star_rate, 'Rate Us'),
                         _buildOptionCard(Icons.subscriptions, 'Subscription'),
+                        _buildOptionCard(Icons.delete, 'Delete Account'),
                       ],
                     ),
                   ],
